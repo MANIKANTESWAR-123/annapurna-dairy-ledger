@@ -6,17 +6,17 @@
   <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Mobile In-Browser Barcode Engine -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- HTML5 Mobile Camera Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'IBM Plex Sans', sans-serif; }
     .mono { font-family: 'IBM Plex Mono', monospace; }
 
-    /* Thermal Receipt Print Styles */
+    /* Thermal Receipt & Counter Sheet Print Styles */
     @media print {
       body * { visibility: hidden; }
-      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt, #printableReceipt *, #printableBarcodeSheet, #printableBarcodeSheet * { visibility: visible; }
       #printableReceipt {
         position: absolute;
         left: 0;
@@ -28,18 +28,22 @@
         font-family: 'IBM Plex Mono', monospace;
         font-size: 11px;
       }
-    }
-
-    #reader video {
-      border-radius: 12px;
-      object-fit: cover;
+      #printableBarcodeSheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #fff;
+        color: #000;
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
   <!-- Scanner Audio & Visual Notification Toast -->
-  <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
+  <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
     <span class="text-lg">📟</span>
     <div>
       <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Barcode Detected</div>
@@ -47,28 +51,25 @@
     </div>
   </div>
 
-  <!-- Mobile Camera Barcode Scanner Modal -->
-  <div id="cameraScanModal" class="fixed inset-0 z-50 bg-black/85 hidden flex-col items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 relative shadow-2xl">
+  <!-- Mobile Camera Scanner Modal Overlay -->
+  <div id="cameraScannerModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 relative shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Mobile Camera Scanner</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider" id="cameraModalTitle">Mobile Barcode Scanner</h3>
         </div>
-        <button type="button" onclick="stopMobileScanner()" class="text-slate-400 hover:text-white text-lg font-bold px-1">✕</button>
+        <button type="button" onclick="closeCameraScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
       </div>
-
-      <!-- Camera Viewport Box -->
-      <div id="reader" class="overflow-hidden rounded-xl bg-black w-full min-h-[250px] border border-slate-800"></div>
-
-      <p class="text-center text-[11px] text-slate-400">Point rear camera at the packet barcode. Beeps automatically on detection!</p>
-
+      
+      <!-- Video Viewport -->
+      <div class="w-full bg-black rounded-xl overflow-hidden min-h-[260px] flex items-center justify-center border border-slate-800" id="cameraReader"></div>
+      
+      <p class="text-[11px] text-center text-slate-400" id="cameraHelpText">Point camera at the barcode on the pouch, jar, or printed counter sheet.</p>
+      
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="toggleCameraTorch()" id="torchToggleBtn" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
-          💡 Flashlight
-        </button>
-        <button type="button" onclick="stopMobileScanner()" class="flex-1 py-2 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition">
-          Close Camera
+        <button type="button" onclick="closeCameraScanner()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl uppercase tracking-wider transition">
+          Done / Close Camera
         </button>
       </div>
     </div>
@@ -85,10 +86,10 @@
             ☁️ Cloud Live Sync
           </span>
           <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Mobile Cam Ready
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Barcode Engine Ready
           </span>
         </div>
-        <p class="text-xs text-slate-400 mt-1">POS Counter Billing, In-Store Customer Sales (MRP) &amp; Kirana Wholesale Distribution</p>
+        <p class="text-xs text-slate-400 mt-1">POS Billing, Camera Barcode Scanner, In-Store Retail &amp; Kirana Distribution</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
@@ -104,7 +105,7 @@
             🏪 Kirana Deliveries
           </button>
           <button type="button" id="tabBtnMaster" onclick="switchView('master')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
-            ⚙️ Price Master
+            ⚙️ Price &amp; Barcode Master
           </button>
         </div>
 
@@ -158,19 +159,17 @@
       <div class="lg:col-span-7 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
-            <h2 class="text-lg font-bold text-white">⚡ Quick POS Touch Counter</h2>
-            <p class="text-xs text-slate-400">Tap mobile scanner button or tap product cards to add to cart</p>
+            <h2 class="text-lg font-bold text-white">⚡ POS Counter Billing</h2>
+            <p class="text-xs text-slate-400">Scan barcodes with camera/scanner or tap items below</p>
           </div>
-          
           <div class="flex items-center gap-2">
-            <!-- Mobile Camera Button -->
-            <button type="button" onclick="startMobileScanner('pos')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1.5 transition active:scale-95">
-              <span>📷 Mobile Scanner</span>
+            <!-- Mobile Camera Scanner Button -->
+            <button type="button" onclick="openCameraScanner('pos')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-emerald-950 transition">
+              <span>📷</span> Phone Scan
             </button>
-            <!-- Barcode manual/laser input -->
             <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
               <span class="text-xs">🔍</span>
-              <input type="text" id="posBarcodeInput" placeholder="Search..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-28" oninput="handlePosSearch(this.value)">
+              <input type="text" id="posBarcodeInput" placeholder="Code / Name..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-28" oninput="handlePosSearch(this.value)">
             </div>
           </div>
         </div>
@@ -178,6 +177,7 @@
         <!-- Category Filters -->
         <div class="flex gap-2 overflow-x-auto pb-1" id="posCategoryTabs">
           <button type="button" onclick="filterPosCategory('all')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition">All</button>
+          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fast Picks / No Barcode</button>
           <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
           <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd</button>
           <button type="button" onclick="filterPosCategory('bucket')" class="px-3 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Buckets</button>
@@ -209,7 +209,7 @@
 
           <!-- Cart Line Items -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
-            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap mobile scanner or product cards to start billing.</div>
+            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product or tap on the left to add.</div>
           </div>
         </div>
 
@@ -422,11 +422,16 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
             <h2 class="text-lg font-bold text-white">Master Price &amp; Barcode Configuration</h2>
-            <p class="text-xs text-slate-400">Scan packet with mobile camera, edit Agent Cost, MRP, and default Shop Rates. Syncs live to cloud.</p>
+            <p class="text-xs text-slate-400">Scan actual pouch barcodes via camera, or assign shortcodes for unbarcoded items (e.g. Fruit Salad).</p>
           </div>
-          <button type="button" onclick="exportMasterCSV()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase">
-            Export Master CSV
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="printCounterBarcodeSheet()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow">
+              <span>🖨️</span> Barcode Sheet
+            </button>
+            <button type="button" onclick="exportMasterCSV()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase tracking-wider">
+              Export CSV
+            </button>
+          </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -435,7 +440,7 @@
               <tr>
                 <th class="p-3">Item Code</th>
                 <th class="p-3">Product Name</th>
-                <th class="p-3 text-center">Barcode (EAN)</th>
+                <th class="p-3 text-center">Barcode / Shortcode</th>
                 <th class="p-3 text-center">Unit</th>
                 <th class="p-3 text-center">Agent Buy Cost (₹)</th>
                 <th class="p-3 text-center">In-Store Cust. MRP (₹)</th>
@@ -499,7 +504,16 @@
     </div>
   </div>
 
-  <!-- Firebase Live Realtime Cloud Script & Mobile Camera Scanner Controller -->
+  <!-- Printable Counter Barcode Sheet Container -->
+  <div id="printableBarcodeSheet" class="hidden">
+    <div style="text-align:center; margin-bottom:16px; border-bottom:2px solid #000; padding-bottom:8px;">
+      <h2 style="font-size:18px; font-weight:bold;">ANNAPURNA DAIRY — COUNTER BARCODE CHEAT SHEET</h2>
+      <p style="font-size:12px;">Place near scanner for unbarcoded products (Fruit Salad, Loose items, etc.)</p>
+    </div>
+    <div id="barcodeSheetGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;"></div>
+  </div>
+
+  <!-- Firebase Live Realtime Cloud Script & Barcode Interceptor -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -540,19 +554,23 @@
       }
     }
 
+    // Default Master Catalog Items with factory or assigned shortcodes
     const DEFAULT_MASTER_ITEMS = {
-      tm: { name: "TM (Toned Milk 500ml)", barcode: "8901001", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
-      fcm: { name: "FCM (Full Cream 500ml)", barcode: "8901002", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
-      smilk: { name: "SMILK (Small Milk 170ml)", barcode: "8901003", section: "milk", unit: "PKT", agentPrice: 8.35, mrp: 10.00, shopRate: 9.00 },
-      teamilk: { name: "Tea Milk Special", barcode: "8901004", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 37.00 },
-      curd450: { name: "450gm Curd Sachet", barcode: "8901005", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 36.00 },
-      scurd: { name: "SCURD (Small Curd 120g)", barcode: "8901006", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
-      bucket10kg: { name: "10kg STM Green Bucket", barcode: "8901007", section: "bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00, shopRate: 700.00 },
-      bucket5kg: { name: "5kg STM Curd Bucket", barcode: "8901008", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 },
-      paneer200: { name: "Paneer 200g Pkt", barcode: "8901009", section: "paneer", unit: "PKT", agentPrice: 80.00, mrp: 95.00, shopRate: 85.00 },
-      paneer500: { name: "Paneer 500g Pkt", barcode: "8901010", section: "paneer", unit: "PKT", agentPrice: 198.00, mrp: 225.00, shopRate: 205.00 },
-      ghee100: { name: "B.Ghee 100ml Jar", barcode: "8901011", section: "paneer", unit: "JAR", agentPrice: 67.00, mrp: 78.00, shopRate: 70.00 },
-      ghee200: { name: "B.Ghee 200ml Jar", barcode: "8901012", section: "paneer", unit: "JAR", agentPrice: 123.00, mrp: 145.00, shopRate: 130.00 }
+      tm: { name: "TM (Toned Milk 500ml)", barcode: "", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
+      fcm: { name: "FCM (Full Cream 500ml)", barcode: "", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
+      smilk: { name: "SMILK (Small Milk 170ml)", barcode: "", section: "milk", unit: "PKT", agentPrice: 8.35, mrp: 10.00, shopRate: 9.00 },
+      teamilk: { name: "Tea Milk Special", barcode: "", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 37.00 },
+      curd450: { name: "450gm Curd Sachet", barcode: "", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 36.00 },
+      scurd: { name: "SCURD (Small Curd 120g)", barcode: "", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
+      bucket10kg: { name: "10kg STM Green Bucket", barcode: "", section: "bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00, shopRate: 700.00 },
+      bucket5kg: { name: "5kg STM Curd Bucket", barcode: "", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 },
+      paneer200: { name: "Paneer 200g Pkt", barcode: "", section: "paneer", unit: "PKT", agentPrice: 80.00, mrp: 95.00, shopRate: 85.00 },
+      paneer500: { name: "Paneer 500g Pkt", barcode: "", section: "paneer", unit: "PKT", agentPrice: 198.00, mrp: 225.00, shopRate: 205.00 },
+      ghee100: { name: "B.Ghee 100ml Jar", barcode: "", section: "paneer", unit: "JAR", agentPrice: 67.00, mrp: 78.00, shopRate: 70.00 },
+      ghee200: { name: "B.Ghee 200ml Jar", barcode: "", section: "paneer", unit: "JAR", agentPrice: 123.00, mrp: 145.00, shopRate: 130.00 },
+      fruitsalad: { name: "Fruit Salad (Bowl/Cup)", barcode: "FS101", section: "nobarcode", unit: "CUP", agentPrice: 25.00, mrp: 40.00, shopRate: 35.00 },
+      junnu: { name: "Junnu Cup 100g", barcode: "JN102", section: "nobarcode", unit: "CUP", agentPrice: 17.25, mrp: 22.00, shopRate: 19.00 },
+      badammilk: { name: "Nut Badam Milk Bottle", barcode: "BM103", section: "nobarcode", unit: "BTL", agentPrice: 28.00, mrp: 35.00, shopRate: 30.00 }
     };
 
     const CLOUD_KEY_MASTER = "annapurna_cloud_master_v6";
@@ -569,6 +587,12 @@
     let currentPosCategory = 'all';
     let demandChart = null;
 
+    let html5QrScannerInstance = null;
+    let cameraMode = 'pos';
+    let cameraAssignTargetKey = null;
+    let lastScannedCode = "";
+    let lastScanTime = 0;
+
     function getLocalDateString(d = new Date()) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -582,9 +606,7 @@
       return getLocalDateString(d);
     }
 
-    // =========================================================================
-    // 🔊 AUDIO BEEP & VISUAL FEEDBACK
-    // =========================================================================
+    // High-pitched grocery counter beep sound
     function playBeep(success = true) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -595,13 +617,13 @@
         osc.frequency.setValueAtTime(success ? 1400 : 250, audioCtx.currentTime);
 
         gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (success ? 0.1 : 0.25));
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (success ? 0.12 : 0.28));
 
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
 
         osc.start();
-        osc.stop(audioCtx.currentTime + (success ? 0.1 : 0.25));
+        osc.stop(audioCtx.currentTime + (success ? 0.12 : 0.28));
       } catch(e) {}
     }
 
@@ -615,120 +637,120 @@
         : "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-rose-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-rose-400";
 
       setTimeout(() => {
-        toast.className = "fixed top-4 right-4 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
+        toast.className = "fixed top-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
       }, 1800);
     }
 
     // =========================================================================
-    // 📱 MOBILE IN-BROWSER CAMERA SCANNER (HTML5-QRCODE)
+    // 📱 MOBILE PHONE CAMERA SCANNER CONTROLLER
     // =========================================================================
-    let html5QrScanner = null;
-    let isCameraScanning = false;
-    let scanModeContext = 'pos'; // 'pos' or 'master:<key>'
-    let isTorchOn = false;
+    window.openCameraScanner = async function(mode = 'pos', targetKey = null) {
+      cameraMode = mode;
+      cameraAssignTargetKey = targetKey;
 
-    window.startMobileScanner = function(context = 'pos') {
-      scanModeContext = context;
-      document.getElementById("cameraScanModal").classList.remove("hidden");
-      document.getElementById("cameraScanModal").classList.add("flex");
+      const modal = document.getElementById("cameraScannerModal");
+      const title = document.getElementById("cameraModalTitle");
+      const help = document.getElementById("cameraHelpText");
 
-      if (!html5QrScanner) {
-        html5QrScanner = new Html5Qrcode("reader");
+      if (mode === 'assign' && targetKey) {
+        title.innerText = `Scan Barcode for ${masterItems[targetKey]?.name || targetKey}`;
+        help.innerText = "Point phone camera at the packet barcode. It will auto-save to this item.";
+      } else {
+        title.innerText = "Mobile Barcode Scanner (POS Counter)";
+        help.innerText = "Point phone camera at milk pouches, curd packets, or printed counter sheet.";
+      }
+
+      modal.classList.remove("hidden");
+
+      if (!html5QrScannerInstance) {
+        html5QrScannerInstance = new Html5Qrcode("cameraReader");
       }
 
       const scanConfig = {
         fps: 15,
-        qrbox: { width: 250, height: 160 },
-        aspectRatio: 1.0
+        qrbox: { width: 260, height: 160 },
+        aspectRatio: 1.0,
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.QR_CODE
+        ]
       };
 
-      html5QrScanner.start(
-        { facingMode: "environment" },
-        scanConfig,
-        (decodedText) => {
-          handleScannedResult(decodedText);
-        },
-        () => {}
-      ).then(() => {
-        isCameraScanning = true;
-      }).catch((err) => {
-        alert("Camera access denied or unsupported: " + err);
-        stopMobileScanner();
-      });
-    };
+      try {
+        await html5QrScannerInstance.start(
+          { facingMode: "environment" },
+          scanConfig,
+          (decodedText) => {
+            const now = Date.now();
+            if (decodedText === lastScannedCode && (now - lastScanTime) < 1800) return;
+            lastScannedCode = decodedText;
+            lastScanTime = now;
 
-    window.stopMobileScanner = function() {
-      if (html5QrScanner && isCameraScanning) {
-        html5QrScanner.stop().then(() => {
-          isCameraScanning = false;
-          document.getElementById("cameraScanModal").classList.add("hidden");
-          document.getElementById("cameraScanModal").classList.remove("flex");
-        }).catch(() => {
-          document.getElementById("cameraScanModal").classList.add("hidden");
-          document.getElementById("cameraScanModal").classList.remove("flex");
-        });
-      } else {
-        document.getElementById("cameraScanModal").classList.add("hidden");
-        document.getElementById("cameraScanModal").classList.remove("flex");
+            if (cameraMode === 'assign' && cameraAssignTargetKey) {
+              handleBarcodeAssignment(cameraAssignTargetKey, decodedText);
+            } else {
+              processScannedBarcode(decodedText);
+            }
+          },
+          () => {}
+        );
+      } catch (err) {
+        alert("Camera permission denied. Please allow camera in your mobile browser settings.");
+        closeCameraScanner();
       }
     };
 
-    window.toggleCameraTorch = function() {
-      if (!html5QrScanner || !isCameraScanning) return;
-      isTorchOn = !isTorchOn;
-      html5QrScanner.applyVideoConstraints({
-        advanced: [{ torch: isTorchOn }]
-      }).catch(() => {
-        alert("Flashlight not supported on this device camera.");
-      });
-      document.getElementById("torchToggleBtn").innerText = isTorchOn ? "💡 Torch ON" : "💡 Flashlight";
+    window.closeCameraScanner = async function() {
+      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
+        try {
+          await html5QrScannerInstance.stop();
+        } catch (e) {}
+      }
+      document.getElementById("cameraScannerModal").classList.add("hidden");
     };
 
-    function handleScannedResult(rawBarcode) {
-      if (scanModeContext === 'pos') {
-        processScannedBarcode(rawBarcode);
-        // Pause 1.5s to prevent reading the exact same packet twice in one second
-        if (html5QrScanner && isCameraScanning) {
-          html5QrScanner.pause();
-          setTimeout(() => {
-            if (html5QrScanner && isCameraScanning) html5QrScanner.resume();
-          }, 1500);
-        }
-      } else if (scanModeContext.startsWith('master:')) {
-        const itemKey = scanModeContext.split(':')[1];
-        playBeep(true);
-        const inputEl = document.getElementById(`masterBarcode_${itemKey}`);
-        if (inputEl) inputEl.value = rawBarcode.trim();
-        showScanToast(`Barcode [${rawBarcode.trim()}] scanned for ${masterItems[itemKey].name}!`, true);
-        stopMobileScanner();
+    window.scanToAssignMasterBarcode = function(itemKey) {
+      openCameraScanner('assign', itemKey);
+    };
+
+    async function handleBarcodeAssignment(itemKey, barcode) {
+      playBeep(true);
+      if (masterItems[itemKey]) {
+        masterItems[itemKey].barcode = barcode.trim();
+        await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+        renderMasterTable();
+        renderPosGrid();
+        showScanToast(`Linked [${barcode}] to ${masterItems[itemKey].name}!`, true);
+        closeCameraScanner();
       }
     }
 
-    function processScannedBarcode(rawBarcode) {
-      const barcodeClean = rawBarcode.trim().toLowerCase();
+    // Auto-generate shortcode for non-barcoded items like fruit salad
+    window.autoGenerateShortcode = async function(itemKey) {
+      const prefix = itemKey.slice(0, 2).toUpperCase();
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      const generatedCode = `${prefix}${randomNum}`;
 
-      // Look up in catalog
-      let matchedKey = Object.keys(masterItems).find(k => {
-        const it = masterItems[k];
-        return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
-      });
+      masterItems[itemKey].barcode = generatedCode;
+      await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+      renderMasterTable();
+      renderPosGrid();
+      alert(`Assigned shortcode "${generatedCode}" to ${masterItems[itemKey].name}! You can now scan/type this code or tap its button.`);
+    };
 
-      if (matchedKey) {
-        playBeep(true);
-        addToCart(matchedKey);
-        showScanToast(`${masterItems[matchedKey].name} (+1) — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
-        switchView('pos');
-      } else {
-        playBeep(false);
-        showScanToast(`Unrecognized Barcode [${rawBarcode}]. Map it in Price Master!`, false);
-      }
-    }
-
-    // Global Keystroke Listener for USB/Bluetooth presentation scanners
+    // Global desktop/USB scanner listener
     let globalBarcodeBuffer = "";
     let lastKeyStrokeTime = Date.now();
 
     window.addEventListener("keydown", (e) => {
+      const activeElement = document.activeElement;
+      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
+
       const now = Date.now();
       const timeDiff = now - lastKeyStrokeTime;
       lastKeyStrokeTime = now;
@@ -736,7 +758,7 @@
       if (timeDiff > 120) globalBarcodeBuffer = "";
 
       if (e.key === "Enter") {
-        if (globalBarcodeBuffer.length >= 3) {
+        if (globalBarcodeBuffer.length >= 2) {
           e.preventDefault();
           processScannedBarcode(globalBarcodeBuffer.trim());
           globalBarcodeBuffer = "";
@@ -746,8 +768,54 @@
       }
     });
 
+    function processScannedBarcode(rawBarcode) {
+      const barcodeClean = rawBarcode.trim().toLowerCase();
+
+      // Check master item barcode or key
+      let matchedKey = Object.keys(masterItems).find(k => {
+        const it = masterItems[k];
+        return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
+      });
+
+      if (matchedKey) {
+        playBeep(true);
+        addToCart(matchedKey);
+        showScanToast(`${masterItems[matchedKey].name} (+1 added) — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
+        switchView('pos');
+      } else {
+        playBeep(false);
+        showScanToast(`Unmapped Barcode [${rawBarcode}]. Map in Price Master!`, false);
+      }
+    }
+
+    // Print counter barcode sheet for unbarcoded items
+    window.printCounterBarcodeSheet = function() {
+      const grid = document.getElementById("barcodeSheetGrid");
+      grid.innerHTML = "";
+
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        const code = it.barcode || k.toUpperCase();
+
+        const card = document.createElement("div");
+        card.style.border = "1px solid #000";
+        card.style.padding = "10px";
+        card.style.textAlign = "center";
+        card.style.borderRadius = "6px";
+        card.innerHTML = `
+          <div style="font-weight:bold; font-size:12px;">${it.name}</div>
+          <div style="font-size:11px; color:#555;">MRP: ₹${Number(it.mrp).toFixed(2)}</div>
+          <div style="font-family:'Courier New', monospace; font-size:18px; font-weight:bold; letter-spacing:3px; margin:8px 0; border:1px dashed #777; padding:4px;">*${code}*</div>
+          <div style="font-size:10px;">Code: <b>${code}</b></div>
+        `;
+        grid.appendChild(card);
+      });
+
+      window.print();
+    };
+
     // =========================================================================
-    // FIREBASE INITIALIZATION & REALTIME SYNC
+    // FIREBASE CLOUD INITIALIZATION & REALTIME LISTENERS
     // =========================================================================
     function attachLiveSyncListeners() {
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
@@ -854,7 +922,8 @@
 
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
-        if (currentPosCategory !== 'all' && it.section !== currentPosCategory) return;
+        if (currentPosCategory === 'nobarcode' && it.section !== 'nobarcode' && it.barcode && it.barcode.length > 5) return;
+        if (currentPosCategory !== 'all' && currentPosCategory !== 'nobarcode' && it.section !== currentPosCategory) return;
 
         const btn = document.createElement("button");
         btn.type = "button";
@@ -868,12 +937,13 @@
         if (it.section === "curd") badgeColor = "text-amber-400";
         if (it.section === "bucket") badgeColor = "text-indigo-400";
         if (it.section === "paneer") badgeColor = "text-emerald-400";
+        if (it.section === "nobarcode") badgeColor = "text-rose-400";
 
         btn.innerHTML = `
           <div>
             <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${it.section}</span>
-              ${it.barcode ? `<span class="text-[9px] text-slate-500 font-mono">🏷️${it.barcode}</span>` : ''}
+              <span class="text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${it.section === 'nobarcode' ? '⚡ Fresh' : it.section}</span>
+              ${it.barcode ? `<span class="text-[9px] text-slate-400 font-mono">🏷️${it.barcode}</span>` : ''}
             </div>
             <div class="text-xs font-bold text-white leading-tight mt-0.5">${it.name}</div>
           </div>
@@ -898,7 +968,7 @@
 
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
-        if (!q || k.toLowerCase().includes(q) || it.name.toLowerCase().includes(q) || (it.barcode && it.barcode.includes(q))) {
+        if (!q || k.toLowerCase().includes(q) || it.name.toLowerCase().includes(q) || (it.barcode && it.barcode.toLowerCase().includes(q))) {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "p-3 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 active:scale-95 transition text-left flex flex-col justify-between h-24 shadow";
@@ -946,7 +1016,7 @@
       document.getElementById("cartItemCountLabel").innerText = `${keys.length} product(s)`;
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap mobile scanner or product cards to start billing.</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product or tap on the left to add.</div>`;
         document.getElementById("posBillSubtotal").innerText = "₹0.00";
         document.getElementById("posBillProfit").innerText = "₹0.00";
         document.getElementById("posBillTotal").innerText = "₹0.00";
@@ -1026,7 +1096,7 @@
           total: qty * price
         });
 
-        // Live Inventory Deduction
+        // Live stock deduction
         if (stockDays[dateStr] && stockDays[dateStr][k]) {
           const currentLeft = Number(stockDays[dateStr][k].leftover) || 0;
           stockDays[dateStr][k].leftover = Math.max(0, currentLeft - qty);
@@ -1394,6 +1464,7 @@
 
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
+        if (it.section === "nobarcode") return; // exclude fresh retail items from kirana bulk
         const row = document.createElement("div");
         row.className = "space-y-1";
         row.innerHTML = `
@@ -1593,11 +1664,7 @@
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
     }
 
-    // =========================================================================
-    // OVERALL METRICS RECONCILIATION
-    // =========================================================================
     function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
-      // 1. Kirana Revenue & Profit
       let kiranaSales = 0;
       let kiranaProfit = 0;
       let kiranaDue = 0;
@@ -1616,7 +1683,6 @@
         });
       });
 
-      // 2. POS / In-Store Retail Revenue & Profit
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
       let retailSales = 0;
       let retailProfit = 0;
@@ -1683,11 +1749,14 @@
           <td class="p-3 mono font-bold text-slate-400 uppercase">${k}</td>
           <td class="p-3 font-semibold text-white">${it.name}</td>
           <td class="p-3 text-center">
-            <div class="inline-flex items-center gap-1.5">
-              <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type Barcode" 
-                class="w-28 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500">
-              <button type="button" onclick="startMobileScanner('master:${k}')" class="px-2 py-1 bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 rounded text-xs font-bold" title="Scan with Phone Camera">
+            <div class="flex items-center justify-center gap-1">
+              <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type" 
+                class="w-28 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500 text-xs">
+              <button type="button" onclick="scanToAssignMasterBarcode('${k}')" title="Scan with Phone Camera" class="px-2 py-1 bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 rounded text-xs">
                 📷
+              </button>
+              <button type="button" onclick="autoGenerateShortcode('${k}')" title="Auto-Assign Shortcode (No barcode)" class="px-2 py-1 bg-amber-950 text-amber-300 border border-amber-800 hover:bg-amber-900 rounded text-xs font-bold">
+                ⚡
               </button>
             </div>
           </td>
@@ -1729,7 +1798,7 @@
       renderPosGrid();
       renderKiranaFormFields();
       loadDateData();
-      alert(`Updated ${masterItems[k].name}: Barcode [${newBarcode}] | Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)} | Shop Rate ₹${newShop.toFixed(2)}`);
+      alert(`Updated ${masterItems[k].name}: Code [${newBarcode}] | Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
     };
 
     window.exportMasterCSV = function() {
