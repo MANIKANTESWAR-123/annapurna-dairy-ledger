@@ -6,6 +6,8 @@
   <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Mobile In-Browser Barcode Engine -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'IBM Plex Sans', sans-serif; }
@@ -19,13 +21,18 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 58mm; /* Standard 2-inch or 80mm 3-inch thermal roll */
+        width: 58mm;
         padding: 4px;
         background: #fff;
         color: #000;
         font-family: 'IBM Plex Mono', monospace;
         font-size: 11px;
       }
+    }
+
+    #reader video {
+      border-radius: 12px;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -35,8 +42,35 @@
   <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
     <span class="text-lg">📟</span>
     <div>
-      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Barcode Scanned</div>
+      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Barcode Detected</div>
       <div class="text-xs font-bold" id="scanToastMessage">Item Added</div>
+    </div>
+  </div>
+
+  <!-- Mobile Camera Barcode Scanner Modal -->
+  <div id="cameraScanModal" class="fixed inset-0 z-50 bg-black/85 hidden flex-col items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 relative shadow-2xl">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Mobile Camera Scanner</span>
+        </div>
+        <button type="button" onclick="stopMobileScanner()" class="text-slate-400 hover:text-white text-lg font-bold px-1">✕</button>
+      </div>
+
+      <!-- Camera Viewport Box -->
+      <div id="reader" class="overflow-hidden rounded-xl bg-black w-full min-h-[250px] border border-slate-800"></div>
+
+      <p class="text-center text-[11px] text-slate-400">Point rear camera at the packet barcode. Beeps automatically on detection!</p>
+
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="toggleCameraTorch()" id="torchToggleBtn" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+          💡 Flashlight
+        </button>
+        <button type="button" onclick="stopMobileScanner()" class="flex-1 py-2 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition">
+          Close Camera
+        </button>
+      </div>
     </div>
   </div>
 
@@ -51,7 +85,7 @@
             ☁️ Cloud Live Sync
           </span>
           <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Scanner Ready
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Mobile Cam Ready
           </span>
         </div>
         <p class="text-xs text-slate-400 mt-1">POS Counter Billing, In-Store Customer Sales (MRP) &amp; Kirana Wholesale Distribution</p>
@@ -125,12 +159,19 @@
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
             <h2 class="text-lg font-bold text-white">⚡ Quick POS Touch Counter</h2>
-            <p class="text-xs text-slate-400">Pass product across presentation scanner or tap buttons below</p>
+            <p class="text-xs text-slate-400">Tap mobile scanner button or tap product cards to add to cart</p>
           </div>
-          <!-- Barcode search / manual input -->
-          <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
-            <span class="text-xs">🔍</span>
-            <input type="text" id="posBarcodeInput" placeholder="Scan Barcode / Search..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36" oninput="handlePosSearch(this.value)">
+          
+          <div class="flex items-center gap-2">
+            <!-- Mobile Camera Button -->
+            <button type="button" onclick="startMobileScanner('pos')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1.5 transition active:scale-95">
+              <span>📷 Mobile Scanner</span>
+            </button>
+            <!-- Barcode manual/laser input -->
+            <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
+              <span class="text-xs">🔍</span>
+              <input type="text" id="posBarcodeInput" placeholder="Search..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-28" oninput="handlePosSearch(this.value)">
+            </div>
           </div>
         </div>
 
@@ -168,7 +209,7 @@
 
           <!-- Cart Line Items -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
-            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan barcode or tap any product to start billing.</div>
+            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap mobile scanner or product cards to start billing.</div>
           </div>
         </div>
 
@@ -381,7 +422,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
             <h2 class="text-lg font-bold text-white">Master Price &amp; Barcode Configuration</h2>
-            <p class="text-xs text-slate-400">Scan or type package barcodes, Agent Cost, MRP, and default Shop Rates. Saved changes sync across all devices.</p>
+            <p class="text-xs text-slate-400">Scan packet with mobile camera, edit Agent Cost, MRP, and default Shop Rates. Syncs live to cloud.</p>
           </div>
           <button type="button" onclick="exportMasterCSV()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase">
             Export Master CSV
@@ -458,7 +499,7 @@
     </div>
   </div>
 
-  <!-- Firebase Live Realtime Cloud Script & Barcode Interceptor -->
+  <!-- Firebase Live Realtime Cloud Script & Mobile Camera Scanner Controller -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -499,7 +540,6 @@
       }
     }
 
-    // Default Master Catalog Items with Barcode IDs
     const DEFAULT_MASTER_ITEMS = {
       tm: { name: "TM (Toned Milk 500ml)", barcode: "8901001", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
       fcm: { name: "FCM (Full Cream 500ml)", barcode: "8901002", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
@@ -515,16 +555,16 @@
       ghee200: { name: "B.Ghee 200ml Jar", barcode: "8901012", section: "paneer", unit: "JAR", agentPrice: 123.00, mrp: 145.00, shopRate: 130.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v5";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v5";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v5";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v5";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v6";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v6";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v6";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v6";
 
     let masterItems = {};
     let kiranaLogs = [];
     let stockDays = {};
     let posSalesLogs = [];
-    let posCart = {}; // { itemKey: qty }
+    let posCart = {};
     let currentPayMode = 'Cash';
     let currentPosCategory = 'all';
     let demandChart = null;
@@ -543,7 +583,7 @@
     }
 
     // =========================================================================
-    // 🎧 OMNIDIRECTIONAL / DESKTOP BARCODE SCANNER INTERCEPTOR & AUDIO BEEP
+    // 🔊 AUDIO BEEP & VISUAL FEEDBACK
     // =========================================================================
     function playBeep(success = true) {
       try {
@@ -552,9 +592,9 @@
         const gainNode = audioCtx.createGain();
 
         osc.type = success ? 'sine' : 'sawtooth';
-        osc.frequency.setValueAtTime(success ? 1400 : 250, audioCtx.currentTime); // Crisp retail scanner frequency
+        osc.frequency.setValueAtTime(success ? 1400 : 250, audioCtx.currentTime);
 
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (success ? 0.1 : 0.25));
 
         osc.connect(gainNode);
@@ -579,40 +619,95 @@
       }, 1800);
     }
 
-    // Global Keystroke Buffer Listener for rapid barcode scanners (<50ms between strokes)
-    let globalBarcodeBuffer = "";
-    let lastKeyStrokeTime = Date.now();
+    // =========================================================================
+    // 📱 MOBILE IN-BROWSER CAMERA SCANNER (HTML5-QRCODE)
+    // =========================================================================
+    let html5QrScanner = null;
+    let isCameraScanning = false;
+    let scanModeContext = 'pos'; // 'pos' or 'master:<key>'
+    let isTorchOn = false;
 
-    window.addEventListener("keydown", (e) => {
-      const activeElement = document.activeElement;
-      const isTypingInSearch = activeElement && activeElement.id === "posBarcodeInput";
-      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
+    window.startMobileScanner = function(context = 'pos') {
+      scanModeContext = context;
+      document.getElementById("cameraScanModal").classList.remove("hidden");
+      document.getElementById("cameraScanModal").classList.add("flex");
 
-      const now = Date.now();
-      const timeDiff = now - lastKeyStrokeTime;
-      lastKeyStrokeTime = now;
-
-      // Scanners type at superhuman speeds (<50ms per key)
-      if (timeDiff > 120) {
-        globalBarcodeBuffer = "";
+      if (!html5QrScanner) {
+        html5QrScanner = new Html5Qrcode("reader");
       }
 
-      if (e.key === "Enter") {
-        if (globalBarcodeBuffer.length >= 3) {
-          e.preventDefault();
-          processScannedBarcode(globalBarcodeBuffer.trim());
-          globalBarcodeBuffer = "";
-          return;
+      const scanConfig = {
+        fps: 15,
+        qrbox: { width: 250, height: 160 },
+        aspectRatio: 1.0
+      };
+
+      html5QrScanner.start(
+        { facingMode: "environment" },
+        scanConfig,
+        (decodedText) => {
+          handleScannedResult(decodedText);
+        },
+        () => {}
+      ).then(() => {
+        isCameraScanning = true;
+      }).catch((err) => {
+        alert("Camera access denied or unsupported: " + err);
+        stopMobileScanner();
+      });
+    };
+
+    window.stopMobileScanner = function() {
+      if (html5QrScanner && isCameraScanning) {
+        html5QrScanner.stop().then(() => {
+          isCameraScanning = false;
+          document.getElementById("cameraScanModal").classList.add("hidden");
+          document.getElementById("cameraScanModal").classList.remove("flex");
+        }).catch(() => {
+          document.getElementById("cameraScanModal").classList.add("hidden");
+          document.getElementById("cameraScanModal").classList.remove("flex");
+        });
+      } else {
+        document.getElementById("cameraScanModal").classList.add("hidden");
+        document.getElementById("cameraScanModal").classList.remove("flex");
+      }
+    };
+
+    window.toggleCameraTorch = function() {
+      if (!html5QrScanner || !isCameraScanning) return;
+      isTorchOn = !isTorchOn;
+      html5QrScanner.applyVideoConstraints({
+        advanced: [{ torch: isTorchOn }]
+      }).catch(() => {
+        alert("Flashlight not supported on this device camera.");
+      });
+      document.getElementById("torchToggleBtn").innerText = isTorchOn ? "💡 Torch ON" : "💡 Flashlight";
+    };
+
+    function handleScannedResult(rawBarcode) {
+      if (scanModeContext === 'pos') {
+        processScannedBarcode(rawBarcode);
+        // Pause 1.5s to prevent reading the exact same packet twice in one second
+        if (html5QrScanner && isCameraScanning) {
+          html5QrScanner.pause();
+          setTimeout(() => {
+            if (html5QrScanner && isCameraScanning) html5QrScanner.resume();
+          }, 1500);
         }
-      } else if (e.key.length === 1) {
-        globalBarcodeBuffer += e.key;
+      } else if (scanModeContext.startsWith('master:')) {
+        const itemKey = scanModeContext.split(':')[1];
+        playBeep(true);
+        const inputEl = document.getElementById(`masterBarcode_${itemKey}`);
+        if (inputEl) inputEl.value = rawBarcode.trim();
+        showScanToast(`Barcode [${rawBarcode.trim()}] scanned for ${masterItems[itemKey].name}!`, true);
+        stopMobileScanner();
       }
-    });
+    }
 
     function processScannedBarcode(rawBarcode) {
       const barcodeClean = rawBarcode.trim().toLowerCase();
 
-      // Look up barcode in master items
+      // Look up in catalog
       let matchedKey = Object.keys(masterItems).find(k => {
         const it = masterItems[k];
         return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
@@ -621,17 +716,38 @@
       if (matchedKey) {
         playBeep(true);
         addToCart(matchedKey);
-        showScanToast(`${masterItems[matchedKey].name} (+1 added) — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
-        // Ensure user is on POS tab so they see live item
+        showScanToast(`${masterItems[matchedKey].name} (+1) — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
         switchView('pos');
       } else {
         playBeep(false);
-        showScanToast(`Unrecognized Barcode [${rawBarcode}]. Map in Price Master!`, false);
+        showScanToast(`Unrecognized Barcode [${rawBarcode}]. Map it in Price Master!`, false);
       }
     }
 
+    // Global Keystroke Listener for USB/Bluetooth presentation scanners
+    let globalBarcodeBuffer = "";
+    let lastKeyStrokeTime = Date.now();
+
+    window.addEventListener("keydown", (e) => {
+      const now = Date.now();
+      const timeDiff = now - lastKeyStrokeTime;
+      lastKeyStrokeTime = now;
+
+      if (timeDiff > 120) globalBarcodeBuffer = "";
+
+      if (e.key === "Enter") {
+        if (globalBarcodeBuffer.length >= 3) {
+          e.preventDefault();
+          processScannedBarcode(globalBarcodeBuffer.trim());
+          globalBarcodeBuffer = "";
+        }
+      } else if (e.key.length === 1) {
+        globalBarcodeBuffer += e.key;
+      }
+    });
+
     // =========================================================================
-    // FIREBASE INITIALIZATION & REALTIME LISTENERS
+    // FIREBASE INITIALIZATION & REALTIME SYNC
     // =========================================================================
     function attachLiveSyncListeners() {
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
@@ -830,7 +946,7 @@
       document.getElementById("cartItemCountLabel").innerText = `${keys.length} product(s)`;
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan barcode or tap any product to start billing.</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap mobile scanner or product cards to start billing.</div>`;
         document.getElementById("posBillSubtotal").innerText = "₹0.00";
         document.getElementById("posBillProfit").innerText = "₹0.00";
         document.getElementById("posBillTotal").innerText = "₹0.00";
@@ -910,7 +1026,7 @@
           total: qty * price
         });
 
-        // Live Inventory Deduction: Deduct from available leftover stock
+        // Live Inventory Deduction
         if (stockDays[dateStr] && stockDays[dateStr][k]) {
           const currentLeft = Number(stockDays[dateStr][k].leftover) || 0;
           stockDays[dateStr][k].leftover = Math.max(0, currentLeft - qty);
@@ -931,14 +1047,11 @@
 
       posSalesLogs.push(posSale);
 
-      // Cloud Persistence
       await cloudSet(CLOUD_KEY_POS_LOGS, JSON.stringify(posSalesLogs));
       await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
 
-      // Trigger Thermal Receipt Print Slip
       printReceiptSlip(posSale);
 
-      // Reset POS Cart
       clearCart();
       document.getElementById("posCustomerName").value = "";
       document.getElementById("posCustomerPhone").value = "";
@@ -1484,6 +1597,7 @@
     // OVERALL METRICS RECONCILIATION
     // =========================================================================
     function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
+      // 1. Kirana Revenue & Profit
       let kiranaSales = 0;
       let kiranaProfit = 0;
       let kiranaDue = 0;
@@ -1502,6 +1616,7 @@
         });
       });
 
+      // 2. POS / In-Store Retail Revenue & Profit
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
       let retailSales = 0;
       let retailProfit = 0;
@@ -1568,8 +1683,13 @@
           <td class="p-3 mono font-bold text-slate-400 uppercase">${k}</td>
           <td class="p-3 font-semibold text-white">${it.name}</td>
           <td class="p-3 text-center">
-            <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type Barcode" 
-              class="w-32 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500">
+            <div class="inline-flex items-center gap-1.5">
+              <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type Barcode" 
+                class="w-28 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500">
+              <button type="button" onclick="startMobileScanner('master:${k}')" class="px-2 py-1 bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 rounded text-xs font-bold" title="Scan with Phone Camera">
+                📷
+              </button>
+            </div>
           </td>
           <td class="p-3 text-center text-slate-400 font-medium">${it.unit}</td>
           <td class="p-3 text-center">
