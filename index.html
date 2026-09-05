@@ -31,6 +31,15 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
+  <!-- Scanner Audio & Visual Notification Toast -->
+  <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
+    <span class="text-lg">📟</span>
+    <div>
+      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Barcode Scanned</div>
+      <div class="text-xs font-bold" id="scanToastMessage">Item Added</div>
+    </div>
+  </div>
+
   <div class="max-w-7xl mx-auto space-y-6">
 
     <!-- Top Header -->
@@ -40,6 +49,9 @@
           <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
           <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
             ☁️ Cloud Live Sync
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Scanner Ready
           </span>
         </div>
         <p class="text-xs text-slate-400 mt-1">POS Counter Billing, In-Store Customer Sales (MRP) &amp; Kirana Wholesale Distribution</p>
@@ -113,9 +125,9 @@
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
             <h2 class="text-lg font-bold text-white">⚡ Quick POS Touch Counter</h2>
-            <p class="text-xs text-slate-400">Tap items to add directly to the cart at retail MRP</p>
+            <p class="text-xs text-slate-400">Pass product across presentation scanner or tap buttons below</p>
           </div>
-          <!-- Barcode scanner input -->
+          <!-- Barcode search / manual input -->
           <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
             <span class="text-xs">🔍</span>
             <input type="text" id="posBarcodeInput" placeholder="Scan Barcode / Search..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36" oninput="handlePosSearch(this.value)">
@@ -156,7 +168,7 @@
 
           <!-- Cart Line Items -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
-            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap any product on the left to start billing.</div>
+            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan barcode or tap any product to start billing.</div>
           </div>
         </div>
 
@@ -211,7 +223,7 @@
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Type the unsold packets remaining in fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
+          Type unsold packets remaining in fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
         </p>
         <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 15&#10;curd450 6"></textarea>
       </div>
@@ -362,14 +374,14 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- VIEW 4: STOCK INVENTORY MASTER & PRICING SETUP                -->
+    <!-- VIEW 4: STOCK INVENTORY MASTER & BARCODE SETUP                -->
     <!-- ============================================================= -->
     <div id="viewMaster" class="space-y-6 hidden">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
-            <h2 class="text-lg font-bold text-white">Master Price &amp; Catalog Configuration</h2>
-            <p class="text-xs text-slate-400">Edit Agent Cost, Customer MRP, and default Shop Rates. Saved changes sync across all devices.</p>
+            <h2 class="text-lg font-bold text-white">Master Price &amp; Barcode Configuration</h2>
+            <p class="text-xs text-slate-400">Scan or type package barcodes, Agent Cost, MRP, and default Shop Rates. Saved changes sync across all devices.</p>
           </div>
           <button type="button" onclick="exportMasterCSV()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase">
             Export Master CSV
@@ -382,6 +394,7 @@
               <tr>
                 <th class="p-3">Item Code</th>
                 <th class="p-3">Product Name</th>
+                <th class="p-3 text-center">Barcode (EAN)</th>
                 <th class="p-3 text-center">Unit</th>
                 <th class="p-3 text-center">Agent Buy Cost (₹)</th>
                 <th class="p-3 text-center">In-Store Cust. MRP (₹)</th>
@@ -445,7 +458,7 @@
     </div>
   </div>
 
-  <!-- Firebase Live Script & App Controller -->
+  <!-- Firebase Live Realtime Cloud Script & Barcode Interceptor -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -486,25 +499,26 @@
       }
     }
 
+    // Default Master Catalog Items with Barcode IDs
     const DEFAULT_MASTER_ITEMS = {
-      tm: { name: "TM (Toned Milk 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
-      fcm: { name: "FCM (Full Cream 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
-      smilk: { name: "SMILK (Small Milk 170ml)", section: "milk", unit: "PKT", agentPrice: 8.35, mrp: 10.00, shopRate: 9.00 },
-      teamilk: { name: "Tea Milk Special", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 37.00 },
-      curd450: { name: "450gm Curd Sachet", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 36.00 },
-      scurd: { name: "SCURD (Small Curd 120g)", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
-      bucket10kg: { name: "10kg STM Green Bucket", section: "bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00, shopRate: 700.00 },
-      bucket5kg: { name: "5kg STM Curd Bucket", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 },
-      paneer200: { name: "Paneer 200g Pkt", section: "paneer", unit: "PKT", agentPrice: 80.00, mrp: 95.00, shopRate: 85.00 },
-      paneer500: { name: "Paneer 500g Pkt", section: "paneer", unit: "PKT", agentPrice: 198.00, mrp: 225.00, shopRate: 205.00 },
-      ghee100: { name: "B.Ghee 100ml Jar", section: "paneer", unit: "JAR", agentPrice: 67.00, mrp: 78.00, shopRate: 70.00 },
-      ghee200: { name: "B.Ghee 200ml Jar", section: "paneer", unit: "JAR", agentPrice: 123.00, mrp: 145.00, shopRate: 130.00 }
+      tm: { name: "TM (Toned Milk 500ml)", barcode: "8901001", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
+      fcm: { name: "FCM (Full Cream 500ml)", barcode: "8901002", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
+      smilk: { name: "SMILK (Small Milk 170ml)", barcode: "8901003", section: "milk", unit: "PKT", agentPrice: 8.35, mrp: 10.00, shopRate: 9.00 },
+      teamilk: { name: "Tea Milk Special", barcode: "8901004", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 37.00 },
+      curd450: { name: "450gm Curd Sachet", barcode: "8901005", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 36.00 },
+      scurd: { name: "SCURD (Small Curd 120g)", barcode: "8901006", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
+      bucket10kg: { name: "10kg STM Green Bucket", barcode: "8901007", section: "bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00, shopRate: 700.00 },
+      bucket5kg: { name: "5kg STM Curd Bucket", barcode: "8901008", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 },
+      paneer200: { name: "Paneer 200g Pkt", barcode: "8901009", section: "paneer", unit: "PKT", agentPrice: 80.00, mrp: 95.00, shopRate: 85.00 },
+      paneer500: { name: "Paneer 500g Pkt", barcode: "8901010", section: "paneer", unit: "PKT", agentPrice: 198.00, mrp: 225.00, shopRate: 205.00 },
+      ghee100: { name: "B.Ghee 100ml Jar", barcode: "8901011", section: "paneer", unit: "JAR", agentPrice: 67.00, mrp: 78.00, shopRate: 70.00 },
+      ghee200: { name: "B.Ghee 200ml Jar", barcode: "8901012", section: "paneer", unit: "JAR", agentPrice: 123.00, mrp: 145.00, shopRate: 130.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v4";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v4";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v4";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v4";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v5";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v5";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v5";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v5";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -528,6 +542,97 @@
       return getLocalDateString(d);
     }
 
+    // =========================================================================
+    // 🎧 OMNIDIRECTIONAL / DESKTOP BARCODE SCANNER INTERCEPTOR & AUDIO BEEP
+    // =========================================================================
+    function playBeep(success = true) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.type = success ? 'sine' : 'sawtooth';
+        osc.frequency.setValueAtTime(success ? 1400 : 250, audioCtx.currentTime); // Crisp retail scanner frequency
+
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (success ? 0.1 : 0.25));
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + (success ? 0.1 : 0.25));
+      } catch(e) {}
+    }
+
+    function showScanToast(msg, isSuccess = true) {
+      const toast = document.getElementById("scanNotificationToast");
+      const msgEl = document.getElementById("scanToastMessage");
+      msgEl.innerText = msg;
+
+      toast.className = isSuccess 
+        ? "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400"
+        : "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-rose-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-rose-400";
+
+      setTimeout(() => {
+        toast.className = "fixed top-4 right-4 z-50 transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
+      }, 1800);
+    }
+
+    // Global Keystroke Buffer Listener for rapid barcode scanners (<50ms between strokes)
+    let globalBarcodeBuffer = "";
+    let lastKeyStrokeTime = Date.now();
+
+    window.addEventListener("keydown", (e) => {
+      const activeElement = document.activeElement;
+      const isTypingInSearch = activeElement && activeElement.id === "posBarcodeInput";
+      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
+
+      const now = Date.now();
+      const timeDiff = now - lastKeyStrokeTime;
+      lastKeyStrokeTime = now;
+
+      // Scanners type at superhuman speeds (<50ms per key)
+      if (timeDiff > 120) {
+        globalBarcodeBuffer = "";
+      }
+
+      if (e.key === "Enter") {
+        if (globalBarcodeBuffer.length >= 3) {
+          e.preventDefault();
+          processScannedBarcode(globalBarcodeBuffer.trim());
+          globalBarcodeBuffer = "";
+          return;
+        }
+      } else if (e.key.length === 1) {
+        globalBarcodeBuffer += e.key;
+      }
+    });
+
+    function processScannedBarcode(rawBarcode) {
+      const barcodeClean = rawBarcode.trim().toLowerCase();
+
+      // Look up barcode in master items
+      let matchedKey = Object.keys(masterItems).find(k => {
+        const it = masterItems[k];
+        return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
+      });
+
+      if (matchedKey) {
+        playBeep(true);
+        addToCart(matchedKey);
+        showScanToast(`${masterItems[matchedKey].name} (+1 added) — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
+        // Ensure user is on POS tab so they see live item
+        switchView('pos');
+      } else {
+        playBeep(false);
+        showScanToast(`Unrecognized Barcode [${rawBarcode}]. Map in Price Master!`, false);
+      }
+    }
+
+    // =========================================================================
+    // FIREBASE INITIALIZATION & REALTIME LISTENERS
+    // =========================================================================
     function attachLiveSyncListeners() {
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
         if (docSnap.exists()) {
@@ -638,7 +743,10 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "p-3 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 active:scale-95 transition text-left flex flex-col justify-between h-24 shadow";
-        btn.onclick = () => addToCart(k);
+        btn.onclick = () => {
+          playBeep(true);
+          addToCart(k);
+        };
 
         let badgeColor = "text-sky-400";
         if (it.section === "curd") badgeColor = "text-amber-400";
@@ -647,7 +755,10 @@
 
         btn.innerHTML = `
           <div>
-            <div class="text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${it.section}</div>
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${it.section}</span>
+              ${it.barcode ? `<span class="text-[9px] text-slate-500 font-mono">🏷️${it.barcode}</span>` : ''}
+            </div>
             <div class="text-xs font-bold text-white leading-tight mt-0.5">${it.name}</div>
           </div>
           <div class="flex justify-between items-center pt-1 border-t border-slate-700/60 mono text-xs font-bold text-emerald-400">
@@ -671,11 +782,14 @@
 
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
-        if (!q || k.toLowerCase().includes(q) || it.name.toLowerCase().includes(q)) {
+        if (!q || k.toLowerCase().includes(q) || it.name.toLowerCase().includes(q) || (it.barcode && it.barcode.includes(q))) {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "p-3 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 active:scale-95 transition text-left flex flex-col justify-between h-24 shadow";
-          btn.onclick = () => addToCart(k);
+          btn.onclick = () => {
+            playBeep(true);
+            addToCart(k);
+          };
           btn.innerHTML = `
             <div>
               <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${it.section}</div>
@@ -716,7 +830,7 @@
       document.getElementById("cartItemCountLabel").innerText = `${keys.length} product(s)`;
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Tap any product on the left to start billing.</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan barcode or tap any product to start billing.</div>`;
         document.getElementById("posBillSubtotal").innerText = "₹0.00";
         document.getElementById("posBillProfit").innerText = "₹0.00";
         document.getElementById("posBillTotal").innerText = "₹0.00";
@@ -770,7 +884,7 @@
 
     window.checkoutPOS = async function() {
       const keys = Object.keys(posCart);
-      if (keys.length === 0) return alert("Cart is empty! Add products first.");
+      if (keys.length === 0) return alert("Cart is empty! Scan barcodes or tap products first.");
 
       const dateStr = getActiveDate();
       const custName = document.getElementById("posCustomerName").value.trim() || "Retail Walk-In";
@@ -932,7 +1046,10 @@
         tr.innerHTML = `
           <td class="p-3 font-semibold text-white">
             <div>${item.name}</div>
-            <span class="text-[10px] text-slate-500 uppercase tracking-wider">${item.unit}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${item.unit}</span>
+              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${item.barcode}</span>` : ''}
+            </div>
           </td>
           <td class="p-3 text-center mono text-[11px]">
             <span class="text-slate-400">₹${Number(item.agentPrice).toFixed(2)}</span> / 
@@ -1367,9 +1484,6 @@
     // OVERALL METRICS RECONCILIATION
     // =========================================================================
     function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
-      const dateStr = getActiveDate();
-
-      // 1. Kirana Revenue & Profit
       let kiranaSales = 0;
       let kiranaProfit = 0;
       let kiranaDue = 0;
@@ -1388,7 +1502,6 @@
         });
       });
 
-      // 2. POS / In-Store Retail Revenue & Profit
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
       let retailSales = 0;
       let retailProfit = 0;
@@ -1441,7 +1554,7 @@
     }
 
     // =========================================================================
-    // VIEW 4: MASTER PRICE CATALOG TABLE
+    // VIEW 4: MASTER PRICE & BARCODE CATALOG TABLE
     // =========================================================================
     function renderMasterTable() {
       const tbody = document.getElementById("masterTableBody");
@@ -1454,6 +1567,10 @@
         tr.innerHTML = `
           <td class="p-3 mono font-bold text-slate-400 uppercase">${k}</td>
           <td class="p-3 font-semibold text-white">${it.name}</td>
+          <td class="p-3 text-center">
+            <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type Barcode" 
+              class="w-32 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500">
+          </td>
           <td class="p-3 text-center text-slate-400 font-medium">${it.unit}</td>
           <td class="p-3 text-center">
             <input type="number" step="0.05" id="masterAgent_${k}" value="${it.agentPrice}" 
@@ -1478,10 +1595,12 @@
     }
 
     window.saveMasterRate = async function(k) {
+      const newBarcode = document.getElementById(`masterBarcode_${k}`).value.trim();
       const newAgent = parseFloat(document.getElementById(`masterAgent_${k}`).value) || 0;
       const newMrp = parseFloat(document.getElementById(`masterMrp_${k}`).value) || 0;
       const newShop = parseFloat(document.getElementById(`masterShop_${k}`).value) || newMrp;
 
+      masterItems[k].barcode = newBarcode;
       masterItems[k].agentPrice = newAgent;
       masterItems[k].mrp = newMrp;
       masterItems[k].shopRate = newShop;
@@ -1490,14 +1609,14 @@
       renderPosGrid();
       renderKiranaFormFields();
       loadDateData();
-      alert(`Updated pricing for ${masterItems[k].name}: Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)} | Shop Rate ₹${newShop.toFixed(2)}`);
+      alert(`Updated ${masterItems[k].name}: Barcode [${newBarcode}] | Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)} | Shop Rate ₹${newShop.toFixed(2)}`);
     };
 
     window.exportMasterCSV = function() {
-      let csv = "Item Key,Product Name,Section,Unit,Agent Buy Cost (INR),Customer MRP (INR),Default Shop Rate (INR)\n";
+      let csv = "Item Key,Product Name,Barcode,Section,Unit,Agent Buy Cost (INR),Customer MRP (INR),Default Shop Rate (INR)\n";
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
-        csv += `"${k}","${it.name}","${it.section}","${it.unit}",${it.agentPrice},${it.mrp},${it.shopRate || it.mrp}\n`;
+        csv += `"${k}","${it.name}","${it.barcode || ''}","${it.section}","${it.unit}",${it.agentPrice},${it.mrp},${it.shopRate || it.mrp}\n`;
       });
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
