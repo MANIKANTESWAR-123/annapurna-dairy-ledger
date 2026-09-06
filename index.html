@@ -6,6 +6,8 @@
   <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- HTML5 Mobile Camera Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'IBM Plex Sans', sans-serif; }
@@ -44,24 +46,111 @@
   <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
     <span class="text-2xl">📟</span>
     <div>
-      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100" id="scanToastTitle">Honeywell Scan</div>
-      <div class="text-xs font-bold" id="scanToastMessage">Item Added</div>
+      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100" id="scanToastTitle">Scanner Event</div>
+      <div class="text-xs font-bold" id="scanToastMessage">Item Processed</div>
     </div>
   </div>
 
-  <!-- Quick Barcode Assignment Modal (Auto-pops when an unmapped barcode is scanned) -->
-  <div id="quickAssignModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
+  <!-- Modal 1: Unmapped Barcode Detected (Choose to Link or Add Brand New) -->
+  <div id="unmappedBarcodeModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
         <div>
           <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">⚡ New Barcode Scanned</span>
-          <h3 class="text-sm font-bold text-white mono mt-0.5">Code: <span id="assignBarcodeDisplay" class="text-emerald-400 font-extrabold text-base"></span></h3>
+          <h3 class="text-sm font-bold text-white mono mt-0.5">Code: <span id="unmappedCodeDisplay" class="text-emerald-400 font-extrabold text-base"></span></h3>
         </div>
-        <button type="button" onclick="closeQuickAssignModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+        <button type="button" onclick="closeUnmappedModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
-      <p class="text-xs text-slate-300">Tap which product this barcode belongs to. It will be saved permanently to your cloud master and added to the cart:</p>
-      <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1" id="quickAssignProductList"></div>
-      <button type="button" onclick="closeQuickAssignModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold rounded-xl uppercase">Cancel</button>
+      <p class="text-xs text-slate-300">This barcode is not yet in your system. What would you like to do?</p>
+      
+      <div class="grid grid-cols-1 gap-2 pt-1">
+        <button type="button" onclick="triggerAddNewFromScan()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl uppercase tracking-wider shadow-lg flex items-center justify-center gap-2">
+          <span>✨</span> Create Brand New Product
+        </button>
+        <button type="button" onclick="showLinkExistingView()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl uppercase tracking-wider border border-slate-700">
+          🔗 Link to Existing Product
+        </button>
+      </div>
+
+      <div id="linkExistingContainer" class="space-y-2 pt-2 border-t border-slate-800 hidden">
+        <span class="text-[11px] text-slate-400">Select product to assign this barcode:</span>
+        <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1" id="linkExistingList"></div>
+      </div>
+
+      <button type="button" onclick="closeUnmappedModal()" class="w-full py-2 text-slate-500 hover:text-slate-300 text-xs font-semibold">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add New Product Form -->
+  <div id="productFormModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white" id="productModalTitle">Add New Product to Catalog</h3>
+        <button type="button" onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <form id="productEntryForm" onsubmit="handleProductFormSubmit(event)" class="space-y-3">
+        <input type="hidden" id="formProductKey" value="">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="md:col-span-2">
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Product Name *</label>
+            <input type="text" id="formProductName" required placeholder="e.g. Amul Salted Butter 100g, Fruit Salad Bowl" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Barcode / EAN (Scan or Type)</label>
+            <div class="flex gap-1.5">
+              <input type="text" id="formProductBarcode" placeholder="Scan barcode..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-400 mono font-bold focus:outline-none focus:border-sky-500">
+              <button type="button" onclick="genFormShortcode()" title="Generate Shortcode" class="px-2.5 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-bold">⚡</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Category / Section *</label>
+            <select id="formProductSection" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option value="milk">Milk Pouch / Crate</option>
+              <option value="curd">Curd Sachet</option>
+              <option value="bucket">Curd Bucket (Bulk)</option>
+              <option value="paneer">Paneer &amp; Ghee</option>
+              <option value="nobarcode">⚡ Fresh / Loose / Quick Pick</option>
+              <option value="beverage">Drinks &amp; Beverages</option>
+              <option value="snacks">Sweets &amp; Bakery</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Unit of Measurement</label>
+            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, CUP, BTL, KG" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Agent Buy Cost (₹) *</label>
+            <input type="number" step="0.05" id="formProductAgentCost" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-emerald-400 mono font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">In-Store Cust. MRP (₹) *</label>
+            <input type="number" step="0.05" id="formProductMrp" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white mono font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Wholesale Shop Rate (₹)</label>
+            <input type="number" step="0.05" id="formProductShopRate" placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-300 mono font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="md:col-span-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800" id="initialStockRow">
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Today's Initial Stock / Opening Units</label>
+            <input type="number" step="any" id="formProductOpeningStock" value="0" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white mono font-bold focus:outline-none">
+            <span class="text-[10px] text-slate-500">Units on hand today in the shop fridge.</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl uppercase">Cancel</button>
+          <button type="submit" id="saveProductBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl uppercase shadow-lg">Save Product</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -70,14 +159,22 @@
     <!-- Top Header -->
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
           <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
             ☁️ Cloud Live Sync
           </span>
-          <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Honeywell USB Ready
-          </span>
+
+          <!-- Interactive Scanner Mode Switcher -->
+          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
+            <span class="text-slate-400 font-semibold px-2">Scanner Mode:</span>
+            <button type="button" id="scanModePosBtn" onclick="setScannerMode('pos')" class="px-2.5 py-1 rounded-lg font-bold transition bg-emerald-600 text-white shadow">
+              🛒 POS Bill
+            </button>
+            <button type="button" id="scanModeStockBtn" onclick="setScannerMode('stock')" class="px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
+              📦 Stock-In (+1)
+            </button>
+          </div>
         </div>
         <p class="text-xs text-slate-400 mt-1">POS Billing, Honeywell Barcode Integration, In-Store Retail &amp; Kirana Distribution</p>
       </div>
@@ -140,12 +237,8 @@
       </div>
     </div>
 
-    <!-- ============================================================= -->
-    <!-- VIEW 1: POS COUNTER BILLING (TOUCH GRID & FAST CHECKOUT)       -->
-    <!-- ============================================================= -->
+    <!-- VIEW 1: POS COUNTER BILLING -->
     <div id="viewPos" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      
-      <!-- Left: Fast 1-Tap Touch Item Selector (7 Cols) -->
       <div class="lg:col-span-7 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
@@ -158,21 +251,18 @@
           </div>
         </div>
 
-        <!-- Category Filters -->
         <div class="flex gap-2 overflow-x-auto pb-1" id="posCategoryTabs">
           <button type="button" onclick="filterPosCategory('all')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition">All</button>
-          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fast Picks / Fresh</button>
+          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fresh / Quick</button>
           <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
           <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd</button>
           <button type="button" onclick="filterPosCategory('bucket')" class="px-3 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Buckets</button>
           <button type="button" onclick="filterPosCategory('paneer')" class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Paneer/Ghee</button>
         </div>
 
-        <!-- 1-Tap Item Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[480px] overflow-y-auto pr-1" id="posProductGrid"></div>
       </div>
 
-      <!-- Right: Active Bill & Cart Summary (5 Cols) -->
       <div class="lg:col-span-5 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between space-y-4">
         <div class="space-y-3">
           <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -183,19 +273,16 @@
             <button type="button" onclick="clearCart()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Clear Cart</button>
           </div>
 
-          <!-- Customer details (Optional) -->
           <div class="grid grid-cols-2 gap-2">
             <input type="text" id="posCustomerName" placeholder="Customer Name (Optional)" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
             <input type="text" id="posCustomerPhone" placeholder="Phone # (Optional)" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
           </div>
 
-          <!-- Cart Line Items -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
             <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>
           </div>
         </div>
 
-        <!-- Bill Total & Payment Action -->
         <div class="pt-3 border-t border-slate-800 space-y-3">
           <div class="space-y-1">
             <div class="flex justify-between text-xs text-slate-400">
@@ -212,7 +299,6 @@
             </div>
           </div>
 
-          <!-- Payment Mode Selection -->
           <div class="grid grid-cols-2 gap-2">
             <button type="button" id="payModeCashBtn" onclick="selectPayMode('Cash')" class="py-2 rounded-xl text-xs font-bold uppercase transition bg-amber-600 text-white shadow">
               💵 Cash Pay
@@ -222,20 +308,15 @@
             </button>
           </div>
 
-          <!-- Complete Sale Button -->
           <button type="button" onclick="checkoutPOS()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl uppercase tracking-wider shadow-lg shadow-emerald-950 transition flex justify-center items-center gap-2">
             <span>✅ Complete Sale &amp; Print Slip</span>
           </button>
         </div>
       </div>
-
     </div>
 
-    <!-- ============================================================= -->
-    <!-- VIEW 2: IN-STORE CUSTOMER RECONCILIATION & STOCK BALANCE      -->
-    <!-- ============================================================= -->
+    <!-- VIEW 2: IN-STORE CUSTOMER RECONCILIATION & STOCK BALANCE -->
     <div id="viewRetail" class="space-y-6 hidden">
-      <!-- Night Leftover Bulk Entry Box -->
       <div class="bg-sky-950/40 p-4 rounded-2xl border border-sky-800/60 shadow-lg space-y-2">
         <div class="flex justify-between items-center">
           <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -251,7 +332,6 @@
         <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 15&#10;curd450 6"></textarea>
       </div>
 
-      <!-- Live Stock & Retail Reconciliation Table -->
       <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
@@ -286,9 +366,7 @@
       </div>
     </div>
 
-    <!-- ============================================================= -->
-    <!-- VIEW 3: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
-    <!-- ============================================================= -->
+    <!-- VIEW 3: KIRANA SHOP DISPATCH & DUES LEDGER -->
     <div id="viewKirana" class="space-y-6 hidden">
       <div class="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-3">
         <div class="flex justify-between items-center flex-wrap gap-2">
@@ -305,7 +383,6 @@
         <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5L&#10;SMilk - 5L&#10;scurd - 10&#10;curd big - 2"></textarea>
       </div>
 
-      <!-- Kirana Delivery Form -->
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800">
           <div>
@@ -396,38 +473,66 @@
       </div>
     </div>
 
-    <!-- ============================================================= -->
-    <!-- VIEW 4: STOCK INVENTORY MASTER & BARCODE SETUP                -->
-    <!-- ============================================================= -->
+    <!-- VIEW 4: STOCK INVENTORY MASTER & PRODUCT CATALOG MANAGEMENT -->
     <div id="viewMaster" class="space-y-6 hidden">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
-            <h2 class="text-lg font-bold text-white">Master Price &amp; Barcode Configuration</h2>
-            <p class="text-xs text-slate-400">Click any barcode box and scan with Honeywell scanner to auto-fill, or click ⚡ to auto-assign codes.</p>
+            <h2 class="text-lg font-bold text-white">Master Catalog &amp; Barcode Management</h2>
+            <p class="text-xs text-slate-400">Scan or add new items, modify MRP, cost, and manage active products.</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openNewProductModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-emerald-950">
+              <span>➕</span> Add New Product
+            </button>
             <button type="button" onclick="printCounterBarcodeSheet()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow">
               <span>🖨️</span> Barcode Sheet
             </button>
-            <button type="button" onclick="exportMasterCSV()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase tracking-wider">
+            <button type="button" onclick="exportMasterCSV()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-lg uppercase tracking-wider border border-slate-700">
               Export CSV
             </button>
           </div>
+        </div>
+
+        <!-- Catalog Live Counts & Stats Banner -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold">Total Catalog Products</span>
+            <p class="text-lg font-bold text-white mono" id="statTotalCatalogItems">0</p>
+          </div>
+          <div>
+            <span class="text-[10px] text-emerald-400 uppercase font-bold">Total Fridge Units Today</span>
+            <p class="text-lg font-bold text-emerald-400 mono" id="statTotalFridgeStock">0</p>
+          </div>
+          <div>
+            <span class="text-[10px] text-sky-400 uppercase font-bold">Barcoded Products</span>
+            <p class="text-lg font-bold text-sky-400 mono" id="statBarcodedItems">0</p>
+          </div>
+          <div>
+            <span class="text-[10px] text-amber-400 uppercase font-bold">Fresh / Loose Products</span>
+            <p class="text-lg font-bold text-amber-400 mono" id="statUnbarcodedItems">0</p>
+          </div>
+        </div>
+
+        <!-- Search in Catalog Table -->
+        <div class="flex justify-between items-center">
+          <input type="text" id="catalogSearchInput" placeholder="Search catalog by name, code or barcode..." oninput="renderMasterTable(this.value)" class="w-72 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          <span class="text-xs text-slate-400" id="masterTableCountLabel">Showing 0 products</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-800 text-[10.5px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
               <tr>
-                <th class="p-3">Item Code</th>
+                <th class="p-3">Item Key</th>
                 <th class="p-3">Product Name</th>
                 <th class="p-3 text-center">Barcode / Shortcode</th>
+                <th class="p-3 text-center">Category</th>
                 <th class="p-3 text-center">Unit</th>
-                <th class="p-3 text-center">Agent Buy Cost (₹)</th>
-                <th class="p-3 text-center">In-Store Cust. MRP (₹)</th>
-                <th class="p-3 text-center">Default Shop Rate (₹)</th>
-                <th class="p-3 text-center">Action</th>
+                <th class="p-3 text-right">Cost (₹)</th>
+                <th class="p-3 text-right">MRP (₹)</th>
+                <th class="p-3 text-right">Shop (₹)</th>
+                <th class="p-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="masterTableBody" class="divide-y divide-slate-800"></tbody>
@@ -554,10 +659,10 @@
       badammilk: { name: "Nut Badam Milk Bottle", barcode: "BM103", section: "nobarcode", unit: "BTL", agentPrice: 28.00, mrp: 35.00, shopRate: 30.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v7";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v7";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v7";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v7";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v8";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v8";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v8";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v8";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -568,6 +673,8 @@
     let currentPosCategory = 'all';
     let demandChart = null;
 
+    // Scanner mode: 'pos' or 'stock'
+    let scannerMode = 'pos';
     let pendingUnmappedBarcode = "";
 
     function getLocalDateString(d = new Date()) {
@@ -594,7 +701,6 @@
         if (success) {
           const osc = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
-          
           osc.type = 'sine';
           osc.frequency.setValueAtTime(1900, audioCtx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(2400, audioCtx.currentTime + 0.08);
@@ -637,6 +743,20 @@
       }, 1900);
     }
 
+    // Scanner Mode Switcher (POS Billing vs Inward Stock Taking)
+    window.setScannerMode = function(mode) {
+      scannerMode = mode;
+      document.getElementById("scanModePosBtn").className = mode === 'pos'
+        ? "px-2.5 py-1 rounded-lg font-bold transition bg-emerald-600 text-white shadow"
+        : "px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white";
+
+      document.getElementById("scanModeStockBtn").className = mode === 'stock'
+        ? "px-2.5 py-1 rounded-lg font-bold transition bg-amber-600 text-white shadow"
+        : "px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white";
+
+      showScanToast("Scanner Mode Changed", mode === 'pos' ? "Mode: Customer POS Billing" : "Mode: Quick Stock-In (+1 Inward)", true);
+    };
+
     // =========================================================================
     // 🎧 HONEYWELL USB SCANNER GLOBAL KEYSTROKE BUFFER & PARSER
     // =========================================================================
@@ -651,7 +771,6 @@
       const timeDiff = now - lastKeyStrokeTime;
       lastKeyStrokeTime = now;
 
-      // Reset buffer if delay indicates human paused typing (>120ms)
       if (timeDiff > 120) globalBarcodeBuffer = "";
 
       if (e.key === "Enter") {
@@ -660,11 +779,10 @@
           const scannedCode = globalBarcodeBuffer.trim();
           globalBarcodeBuffer = "";
 
-          // If focused inside a master table barcode box, let it fill & save
-          if (activeElement && activeElement.id && activeElement.id.startsWith("masterBarcode_")) {
+          // If focused inside any barcode field in a modal/form
+          if (activeElement && (activeElement.id === "formProductBarcode" || activeElement.id === "posBarcodeInput")) {
             activeElement.value = scannedCode;
-            const itemKey = activeElement.id.replace("masterBarcode_", "");
-            saveMasterRate(itemKey);
+            if (activeElement.id === "posBarcodeInput") handlePosSearch(scannedCode);
             return;
           }
 
@@ -675,88 +793,286 @@
       }
     });
 
-    function processHoneywellBarcode(rawCode) {
+    async function processHoneywellBarcode(rawCode) {
       const cleanCode = rawCode.trim().toLowerCase();
 
-      // Find matching item by registered barcode or key
       let matchedKey = Object.keys(masterItems).find(k => {
         const it = masterItems[k];
         return (it.barcode && it.barcode.trim().toLowerCase() === cleanCode) || k.toLowerCase() === cleanCode;
       });
 
       if (matchedKey) {
+        const item = masterItems[matchedKey];
         playBigBeep(true);
-        addToCart(matchedKey);
-        showScanToast("Added to Cart", `${masterItems[matchedKey].name} — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
-        switchView('pos');
+
+        if (scannerMode === 'stock') {
+          // Rapid Inward Stock-In Mode: Increment today's inward count!
+          const dateStr = getActiveDate();
+          if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+          if (!stockDays[dateStr][matchedKey]) {
+            stockDays[dateStr][matchedKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+          }
+          stockDays[dateStr][matchedKey].inward = (Number(stockDays[dateStr][matchedKey].inward) || 0) + 1;
+          
+          // Re-calculate leftover
+          const totalAvail = (Number(stockDays[dateStr][matchedKey].opening) || 0) + (Number(stockDays[dateStr][matchedKey].inward) || 0);
+          stockDays[dateStr][matchedKey].leftover = totalAvail;
+
+          await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+          loadDateData();
+          showScanToast("📦 Stock-In (+1)", `${item.name} Inward: ${stockDays[dateStr][matchedKey].inward} units`, true);
+          switchView('retail');
+        } else {
+          // Standard POS Billing Mode: Add to cart
+          addToCart(matchedKey);
+          showScanToast("🛒 Added to Cart", `${item.name} — ₹${Number(item.mrp).toFixed(2)}`, true);
+          switchView('pos');
+        }
       } else {
-        // Unmapped barcode: trigger 1-tap quick assignment modal!
+        // Unmapped Barcode -> Pop action modal
         playBigBeep(false);
-        openQuickAssignModal(rawCode);
+        pendingUnmappedBarcode = rawCode;
+        openUnmappedModal(rawCode);
       }
     }
 
     // =========================================================================
-    // ⚡ 1-TAP INSTANT BARCODE MAPPING MODAL
+    // ⚡ UNMAPPED BARCODE WORKFLOW MODAL
     // =========================================================================
-    function openQuickAssignModal(scannedCode) {
-      pendingUnmappedBarcode = scannedCode;
-      document.getElementById("assignBarcodeDisplay").innerText = scannedCode;
-      const container = document.getElementById("quickAssignProductList");
+    function openUnmappedModal(code) {
+      document.getElementById("unmappedCodeDisplay").innerText = code;
+      document.getElementById("linkExistingContainer").classList.add("hidden");
+      document.getElementById("unmappedBarcodeModal").classList.remove("hidden");
+    }
+
+    window.closeUnmappedModal = function() {
+      document.getElementById("unmappedBarcodeModal").classList.add("hidden");
+      pendingUnmappedBarcode = "";
+    };
+
+    window.triggerAddNewFromScan = function() {
+      const code = pendingUnmappedBarcode;
+      closeUnmappedModal();
+      openNewProductModal(code);
+    };
+
+    window.showLinkExistingView = function() {
+      const container = document.getElementById("linkExistingList");
       container.innerHTML = "";
+      document.getElementById("linkExistingContainer").classList.remove("hidden");
 
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "p-2.5 rounded-xl bg-slate-800 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500 text-left transition active:scale-95";
-        btn.onclick = () => confirmAssignBarcode(k);
+        btn.className = "p-2 rounded-lg bg-slate-800 hover:bg-emerald-950 border border-slate-700 hover:border-emerald-500 text-left transition active:scale-95";
+        btn.onclick = () => confirmLinkBarcode(k);
         btn.innerHTML = `
           <div class="text-xs font-bold text-white leading-tight">${it.name}</div>
-          <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
-            <span>MRP: ₹${Number(it.mrp).toFixed(2)}</span>
-            <span class="mono text-emerald-400 font-bold">${it.barcode ? 'Change Code' : 'Assign Code'}</span>
-          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">MRP: ₹${Number(it.mrp).toFixed(2)}</div>
         `;
         container.appendChild(btn);
       });
-
-      document.getElementById("quickAssignModal").classList.remove("hidden");
-    }
-
-    window.closeQuickAssignModal = function() {
-      document.getElementById("quickAssignModal").classList.add("hidden");
-      pendingUnmappedBarcode = "";
     };
 
-    async function confirmAssignBarcode(itemKey) {
+    async function confirmLinkBarcode(itemKey) {
       if (!pendingUnmappedBarcode || !masterItems[itemKey]) return;
-      const codeToLink = pendingUnmappedBarcode;
+      const code = pendingUnmappedBarcode;
 
-      masterItems[itemKey].barcode = codeToLink;
+      masterItems[itemKey].barcode = code;
       await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
 
       playBigBeep(true);
-      addToCart(itemKey);
-      showScanToast("Barcode Linked & Added", `${masterItems[itemKey].name} linked to [${codeToLink}]!`, true);
+      showScanToast("Barcode Linked", `[${code}] assigned to ${masterItems[itemKey].name}`, true);
 
-      closeQuickAssignModal();
+      closeUnmappedModal();
       renderMasterTable();
       renderPosGrid();
-      switchView('pos');
+
+      if (scannerMode === 'stock') {
+        processHoneywellBarcode(code);
+      } else {
+        addToCart(itemKey);
+        switchView('pos');
+      }
     }
 
-    window.autoGenerateShortcode = async function(itemKey) {
-      const prefix = itemKey.slice(0, 2).toUpperCase();
-      const randomNum = Math.floor(100 + Math.random() * 900);
-      const generatedCode = `${prefix}${randomNum}`;
+    // =========================================================================
+    // ➕ ADD & EDIT PRODUCT MODAL CONTROLLER
+    // =========================================================================
+    window.openNewProductModal = function(initialBarcode = "") {
+      document.getElementById("productModalTitle").innerText = "Add New Product to Catalog";
+      document.getElementById("productEntryForm").reset();
+      document.getElementById("formProductKey").value = "";
+      document.getElementById("formProductBarcode").value = initialBarcode || "";
+      document.getElementById("formProductUnit").value = "PKT";
+      document.getElementById("initialStockRow").classList.remove("hidden");
+      document.getElementById("saveProductBtn").innerText = "Save to Catalog";
+      document.getElementById("productFormModal").classList.remove("hidden");
+    };
 
-      masterItems[itemKey].barcode = generatedCode;
+    window.openEditProductModal = function(itemKey) {
+      const it = masterItems[itemKey];
+      if (!it) return;
+
+      document.getElementById("productModalTitle").innerText = `Edit: ${it.name}`;
+      document.getElementById("formProductKey").value = itemKey;
+      document.getElementById("formProductName").value = it.name;
+      document.getElementById("formProductBarcode").value = it.barcode || "";
+      document.getElementById("formProductSection").value = it.section || "milk";
+      document.getElementById("formProductUnit").value = it.unit || "PKT";
+      document.getElementById("formProductAgentCost").value = it.agentPrice;
+      document.getElementById("formProductMrp").value = it.mrp;
+      document.getElementById("formProductShopRate").value = it.shopRate || it.mrp;
+      document.getElementById("initialStockRow").classList.add("hidden"); // Stock edited via stock sheet
+      document.getElementById("saveProductBtn").innerText = "Update Product";
+
+      document.getElementById("productFormModal").classList.remove("hidden");
+    };
+
+    window.closeProductModal = function() {
+      document.getElementById("productFormModal").classList.add("hidden");
+    };
+
+    window.genFormShortcode = function() {
+      const name = document.getElementById("formProductName").value.trim();
+      const prefix = (name ? name.slice(0, 2) : "PR").toUpperCase();
+      const code = `${prefix}${Math.floor(100 + Math.random() * 900)}`;
+      document.getElementById("formProductBarcode").value = code;
+    };
+
+    window.handleProductFormSubmit = async function(e) {
+      e.preventDefault();
+      const existingKey = document.getElementById("formProductKey").value;
+      const name = document.getElementById("formProductName").value.trim();
+      const barcode = document.getElementById("formProductBarcode").value.trim();
+      const section = document.getElementById("formProductSection").value;
+      const unit = (document.getElementById("formProductUnit").value.trim() || "PKT").toUpperCase();
+      const agentPrice = parseFloat(document.getElementById("formProductAgentCost").value) || 0;
+      const mrp = parseFloat(document.getElementById("formProductMrp").value) || 0;
+      const shopRate = parseFloat(document.getElementById("formProductShopRate").value) || mrp;
+      const initialStock = parseFloat(document.getElementById("formProductOpeningStock")?.value) || 0;
+
+      // Unique Item Key
+      const key = existingKey || ("item_" + Date.now().toString(36) + "_" + name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6));
+
+      masterItems[key] = {
+        name,
+        barcode,
+        section,
+        unit,
+        agentPrice,
+        mrp,
+        shopRate
+      };
+
+      // Set initial stock if brand new item
+      const dateStr = getActiveDate();
+      if (!existingKey && initialStock > 0) {
+        if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+        stockDays[dateStr][key] = {
+          opening: initialStock,
+          inward: 0,
+          leftover: initialStock,
+          home: 0
+        };
+        await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      }
+
       await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+
+      playBigBeep(true);
+      closeProductModal();
       renderMasterTable();
       renderPosGrid();
-      alert(`Assigned shortcode "${generatedCode}" to ${masterItems[itemKey].name}!`);
+      renderKiranaFormFields();
+      loadDateData();
+
+      showScanToast(existingKey ? "Product Updated" : "New Product Added", `${name} (MRP: ₹${mrp})`, true);
     };
+
+    // Delete Product from Master Catalog
+    window.deleteMasterProduct = async function(itemKey) {
+      const it = masterItems[itemKey];
+      if (!it) return;
+
+      if (confirm(`Are you sure you want to permanently DELETE "${it.name}" from the product catalog?`)) {
+        delete masterItems[itemKey];
+        if (posCart[itemKey]) delete posCart[itemKey];
+
+        await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+        renderMasterTable();
+        renderPosGrid();
+        renderKiranaFormFields();
+        loadDateData();
+        renderDemandChart();
+        showScanToast("Product Deleted", `${it.name} removed from catalog`, false);
+      }
+    };
+
+    // =========================================================================
+    // MASTER CATALOG TABLE & STATS DASHBOARD
+    // =========================================================================
+    function renderMasterTable(filterQuery = "") {
+      const tbody = document.getElementById("masterTableBody");
+      tbody.innerHTML = "";
+
+      const q = (filterQuery || document.getElementById("catalogSearchInput")?.value || "").trim().toLowerCase();
+      const keys = Object.keys(masterItems);
+
+      let displayedCount = 0;
+      let barcodedCount = 0;
+      let unbarcodedCount = 0;
+
+      keys.forEach(k => {
+        const it = masterItems[k];
+        if (it.barcode && it.barcode.length > 0) barcodedCount++;
+        else unbarcodedCount++;
+
+        if (q && !k.toLowerCase().includes(q) && !it.name.toLowerCase().includes(q) && !(it.barcode && it.barcode.toLowerCase().includes(q))) {
+          return;
+        }
+
+        displayedCount++;
+
+        let badgeColor = "text-sky-400";
+        if (it.section === "curd") badgeColor = "text-amber-400";
+        if (it.section === "bucket") badgeColor = "text-indigo-400";
+        if (it.section === "paneer") badgeColor = "text-emerald-400";
+        if (it.section === "nobarcode") badgeColor = "text-rose-400";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 mono font-bold text-slate-400 uppercase text-[11px]">${k}</td>
+          <td class="p-3 font-semibold text-white">
+            <div>${it.name}</div>
+          </td>
+          <td class="p-3 text-center mono font-bold">
+            ${it.barcode ? `<span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 text-[11px]">🏷️ ${it.barcode}</span>` : `<span class="text-slate-500 text-[10px]">— Unassigned —</span>`}
+          </td>
+          <td class="p-3 text-center uppercase font-bold text-[10px] ${badgeColor}">${it.section || 'General'}</td>
+          <td class="p-3 text-center text-slate-400 font-medium">${it.unit || 'PKT'}</td>
+          <td class="p-3 text-right mono font-bold text-emerald-400">₹${Number(it.agentPrice).toFixed(2)}</td>
+          <td class="p-3 text-right mono font-bold text-white">₹${Number(it.mrp).toFixed(2)}</td>
+          <td class="p-3 text-right mono font-bold text-sky-300">₹${Number(it.shopRate || it.mrp).toFixed(2)}</td>
+          <td class="p-3 text-center space-x-1.5">
+            <button type="button" onclick="openEditProductModal('${k}')" class="px-2.5 py-1 bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 rounded text-xs font-bold transition">
+              ✏️ Edit
+            </button>
+            <button type="button" onclick="deleteMasterProduct('${k}')" class="px-2.5 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded text-xs font-bold transition">
+              🗑️ Delete
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("masterTableCountLabel").innerText = `Showing ${displayedCount} of ${keys.length} products`;
+      document.getElementById("statTotalCatalogItems").innerText = keys.length;
+      document.getElementById("statBarcodedItems").innerText = barcodedCount;
+      document.getElementById("statUnbarcodedItems").innerText = unbarcodedCount;
+    }
 
     window.printCounterBarcodeSheet = function() {
       const grid = document.getElementById("barcodeSheetGrid");
@@ -781,6 +1097,19 @@
       });
 
       window.print();
+    };
+
+    window.exportMasterCSV = function() {
+      let csv = "Item Key,Product Name,Barcode,Section,Unit,Agent Buy Cost (INR),Customer MRP (INR),Default Shop Rate (INR)\n";
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        csv += `"${k}","${it.name}","${it.barcode || ''}","${it.section}","${it.unit}",${it.agentPrice},${it.mrp},${it.shopRate || it.mrp}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Annapurna_Price_Master_${getActiveDate()}.csv`;
+      a.click();
     };
 
     // =========================================================================
@@ -883,7 +1212,7 @@
     }
 
     // =========================================================================
-    // ⚡ POS COUNTER BILLING CONTROLLER
+    // POS BILLING CONTROLLER
     // =========================================================================
     function renderPosGrid() {
       const grid = document.getElementById("posProductGrid");
@@ -1177,6 +1506,7 @@
       tbody.innerHTML = "";
 
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
+      let totalFridgeUnits = 0;
 
       Object.keys(masterItems).forEach(k => {
         const item = masterItems[k];
@@ -1189,6 +1519,8 @@
         const leftover = Number(stockData.leftover) || 0;
         const home = Number(stockData.home) || 0;
 
+        totalFridgeUnits += leftover;
+
         const retailCustSold = Math.max(0, totalAvail - sentToKirana - leftover - home);
         const retailRevenue = retailCustSold * Number(item.mrp);
         const retailProfit = retailCustSold * (Number(item.mrp) - Number(item.agentPrice));
@@ -1200,7 +1532,7 @@
             <div>${item.name}</div>
             <div class="flex items-center gap-2">
               <span class="text-[10px] text-slate-500 uppercase tracking-wider">${item.unit}</span>
-              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${it.barcode || item.barcode}</span>` : ''}
+              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${item.barcode}</span>` : ''}
             </div>
           </td>
           <td class="p-3 text-center mono text-[11px]">
@@ -1237,6 +1569,9 @@
         `;
         tbody.appendChild(tr);
       });
+
+      const statFridge = document.getElementById("statTotalFridgeStock");
+      if (statFridge) statFridge.innerText = totalFridgeUnits;
     }
 
     window.updateStockField = async function(itemKey, field, val) {
@@ -1391,11 +1726,10 @@
 
       Object.keys(masterItems).forEach(k => {
         if (parsedItems[k]) {
-          document.getElementById(`kqty_${k}`).value = parsedItems[k].qty;
-          document.getElementById(`krate_${k}`).value = parsedItems[k].sellRate;
-        } else {
-          const el = document.getElementById(`kqty_${k}`);
-          if (el) el.value = "";
+          const elQ = document.getElementById(`kqty_${k}`);
+          const elR = document.getElementById(`krate_${k}`);
+          if (elQ) elQ.value = parsedItems[k].qty;
+          if (elR) elR.value = parsedItems[k].sellRate;
         }
       });
 
@@ -1633,9 +1967,6 @@
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
     }
 
-    // =========================================================================
-    // OVERALL METRICS RECONCILIATION
-    // =========================================================================
     function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
@@ -1707,84 +2038,7 @@
     }
 
     // =========================================================================
-    // VIEW 4: MASTER PRICE & BARCODE CATALOG TABLE
-    // =========================================================================
-    function renderMasterTable() {
-      const tbody = document.getElementById("masterTableBody");
-      tbody.innerHTML = "";
-
-      Object.keys(masterItems).forEach(k => {
-        const it = masterItems[k];
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-800/50 transition";
-        tr.innerHTML = `
-          <td class="p-3 mono font-bold text-slate-400 uppercase">${k}</td>
-          <td class="p-3 font-semibold text-white">${it.name}</td>
-          <td class="p-3 text-center">
-            <div class="flex items-center justify-center gap-1">
-              <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type" 
-                class="w-32 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500 text-xs">
-              <button type="button" onclick="autoGenerateShortcode('${k}')" title="Auto-Assign Shortcode" class="px-2 py-1 bg-amber-950 text-amber-300 border border-amber-800 hover:bg-amber-900 rounded text-xs font-bold">
-                ⚡
-              </button>
-            </div>
-          </td>
-          <td class="p-3 text-center text-slate-400 font-medium">${it.unit}</td>
-          <td class="p-3 text-center">
-            <input type="number" step="0.05" id="masterAgent_${k}" value="${it.agentPrice}" 
-              class="w-24 bg-slate-800 border border-slate-700 text-right text-emerald-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
-          </td>
-          <td class="p-3 text-center">
-            <input type="number" step="0.05" id="masterMrp_${k}" value="${it.mrp}" 
-              class="w-24 bg-slate-800 border border-slate-700 text-right text-white mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
-          </td>
-          <td class="p-3 text-center">
-            <input type="number" step="0.05" id="masterShop_${k}" value="${it.shopRate || it.mrp}" 
-              class="w-24 bg-slate-800 border border-slate-700 text-right text-sky-300 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
-          </td>
-          <td class="p-3 text-center">
-            <button type="button" onclick="saveMasterRate('${k}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded transition">
-              Save
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    window.saveMasterRate = async function(k) {
-      const newBarcode = document.getElementById(`masterBarcode_${k}`).value.trim();
-      const newAgent = parseFloat(document.getElementById(`masterAgent_${k}`).value) || 0;
-      const newMrp = parseFloat(document.getElementById(`masterMrp_${k}`).value) || 0;
-      const newShop = parseFloat(document.getElementById(`masterShop_${k}`).value) || newMrp;
-
-      masterItems[k].barcode = newBarcode;
-      masterItems[k].agentPrice = newAgent;
-      masterItems[k].mrp = newMrp;
-      masterItems[k].shopRate = newShop;
-
-      await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
-      renderPosGrid();
-      renderKiranaFormFields();
-      loadDateData();
-      alert(`Updated ${masterItems[k].name}: Code [${newBarcode}] | Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
-    };
-
-    window.exportMasterCSV = function() {
-      let csv = "Item Key,Product Name,Barcode,Section,Unit,Agent Buy Cost (INR),Customer MRP (INR),Default Shop Rate (INR)\n";
-      Object.keys(masterItems).forEach(k => {
-        const it = masterItems[k];
-        csv += `"${k}","${it.name}","${it.barcode || ''}","${it.section}","${it.unit}",${it.agentPrice},${it.mrp},${it.shopRate || it.mrp}\n`;
-      });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Annapurna_Price_Master_${getActiveDate()}.csv`;
-      a.click();
-    };
-
-    // =========================================================================
-    // 7-DAY DEMAND ANALYSIS CHART
+    // DEMAND CHART
     // =========================================================================
     function renderDemandChart() {
       const dates = [];
