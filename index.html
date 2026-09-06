@@ -51,7 +51,7 @@
     </div>
   </div>
 
-  <!-- Modal 1: Unmapped Barcode Detected (Choose to Link or Add Brand New) -->
+  <!-- Modal 1: Unmapped Barcode Detected -->
   <div id="unmappedBarcodeModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -147,7 +147,7 @@
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
           <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl uppercase">Cancel</button>
-          <button type="submit" id="saveProductBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl uppercase shadow-lg">Save Product</button>
+          <button type="submit" id="saveProductBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl uppercase shadow-lg">Save to Catalog</button>
         </div>
       </form>
     </div>
@@ -164,7 +164,7 @@
             ☁️ Cloud Live Sync
           </span>
 
-          <!-- Interactive Scanner Mode Switcher -->
+          <!-- Scanner Mode Switcher -->
           <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
             <span class="text-slate-400 font-semibold px-2">Scanner:</span>
             <button type="button" id="scanModePosBtn" onclick="setScannerMode('pos')" class="px-2.5 py-1 rounded-lg font-bold transition bg-emerald-600 text-white shadow">
@@ -175,7 +175,7 @@
             </button>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mt-1">POS Billing, Kirana Wholesale (Steppers), In-Store Retail &amp; Cloud Inventory</p>
+        <p class="text-xs text-slate-400 mt-1">POS Billing, Kirana Wholesale, Stock Procurement &amp; End-of-Day Cashflow Reconciliation</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
@@ -189,6 +189,9 @@
           </button>
           <button type="button" id="tabBtnRetail" onclick="switchView('retail')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
             🛒 Stock Balance
+          </button>
+          <button type="button" id="tabBtnExpenses" onclick="switchView('expenses')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+            💰 Cash &amp; Expenses
           </button>
           <button type="button" id="tabBtnMaster" onclick="switchView('master')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
             ⚙️ Price &amp; Catalog
@@ -205,29 +208,29 @@
     <!-- Overall Daily Metrics Dashboard -->
     <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Day Revenue</span>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Sales Revenue</span>
         <p class="text-lg md:text-xl font-bold text-white mt-1 mono" id="metricGrandSales">₹0.00</p>
         <span class="text-[10px] text-slate-500" id="subSalesBreakdown">Kirana: ₹0 | POS: ₹0</span>
       </div>
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Net Profit Today</span>
+        <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Net Profit (Today)</span>
         <p class="text-lg md:text-xl font-bold text-emerald-400 mt-1 mono" id="metricGrandProfit">₹0.00</p>
         <span class="text-[10px] text-slate-500" id="subProfitBreakdown">Kirana: ₹0 | POS: ₹0</span>
+      </div>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Cash in Counter</span>
+        <p class="text-lg md:text-xl font-bold text-amber-300 mt-1 mono" id="metricNetCashDrawer">₹0.00</p>
+        <span class="text-[10px] text-slate-500" id="subCashSummary">In: ₹0 | Out: ₹0</span>
+      </div>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+        <span class="text-[10px] text-sky-400 font-bold uppercase tracking-wider">Online / UPI Bank</span>
+        <p class="text-lg md:text-xl font-bold text-sky-300 mt-1 mono" id="metricNetOnlineBank">₹0.00</p>
+        <span class="text-[10px] text-slate-500" id="subOnlineSummary">In: ₹0 | Out: ₹0</span>
       </div>
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
         <span class="text-[10px] text-rose-400 font-bold uppercase tracking-wider">Kirana Dues Pending</span>
         <p class="text-lg md:text-xl font-bold text-rose-400 mt-1 mono" id="metricKiranaDue">₹0.00</p>
         <span class="text-[10px] text-slate-500">Unpaid shop bills</span>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-sky-400 font-bold uppercase tracking-wider">In-Store Milk Sold</span>
-        <p class="text-lg md:text-xl font-bold text-sky-300 mt-1 mono" id="metricRetailMilkSold">0 Ltr</p>
-        <span class="text-[10px] text-slate-500" id="subTotalMilk">Total: 0 Ltr</span>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">In-Store Curd Sold</span>
-        <p class="text-lg md:text-xl font-bold text-amber-300 mt-1 mono" id="metricRetailCurdSold">0 Units</p>
-        <span class="text-[10px] text-slate-500" id="subTotalCurd">Total: 0 Units</span>
       </div>
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
         <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Fridge Leftovers</span>
@@ -236,12 +239,8 @@
       </div>
     </div>
 
-    <!-- ============================================================= -->
-    <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
-    <!-- ============================================================= -->
+    <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER -->
     <div id="viewKirana" class="space-y-6">
-      
-      <!-- Quick Bulk Kirana Text Dispatch Box -->
       <div class="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-3">
         <div class="flex justify-between items-center flex-wrap gap-2">
           <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -257,7 +256,7 @@
         <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5L&#10;Cow Milk - 3L&#10;SMilk - 2L&#10;SCurd - 2L&#10;Paneer - 1&#10;Lassi - 4&#10;Buttermilk - 6"></textarea>
       </div>
 
-      <!-- Kirana Delivery Form with Touch Steppers [-] Qty [+] -->
+      <!-- Kirana Delivery Form with Stepper Controls -->
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 flex-wrap gap-2">
           <div>
@@ -266,7 +265,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openNewProductModal()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-              <span>➕</span> Add New Product to Shop
+              <span>➕</span> Add New Product
             </button>
             <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline px-2">Clear Form</button>
           </div>
@@ -282,10 +281,11 @@
               <datalist id="shopNamesDatalist"></datalist>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status</label>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status &amp; Method</label>
               <select id="kiranaPaymentStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium">
-                <option value="Not Paid" selected class="text-rose-400">Not Paid (Due)</option>
-                <option value="Paid" class="text-emerald-400">Paid (Cleared)</option>
+                <option value="Not Paid" selected class="text-rose-400">Not Paid (Pending Due)</option>
+                <option value="Paid (Cash)" class="text-amber-400">Paid in Cash</option>
+                <option value="Paid (UPI / Online)" class="text-emerald-400">Paid via UPI / Online</option>
               </select>
             </div>
             <div>
@@ -296,10 +296,8 @@
 
           <!-- Dynamic Products Grid with Stepper Controls -->
           <div class="space-y-3 pt-2">
-            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Select Delivery Quantities (Click - / +)</span>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer">
-              <!-- Rendered dynamically with [-] Qty [+] steppers -->
-            </div>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer"></div>
           </div>
 
           <!-- Live Total & Submit -->
@@ -321,7 +319,7 @@
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
             <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kirana Delivery Register (<span id="kiranaDateDisplay">--</span>)</h2>
-            <p class="text-xs text-slate-400">Click payment status to toggle Paid (Green) / Not Paid (Red)</p>
+            <p class="text-xs text-slate-400">Click payment status button to cycle between Not Paid, Cash, and UPI</p>
           </div>
           <span id="kiranaShopCountBadge" class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono">0 Shops</span>
         </div>
@@ -473,7 +471,156 @@
       </div>
     </div>
 
-    <!-- VIEW 4: STOCK INVENTORY MASTER & PRODUCT CATALOG -->
+    <!-- VIEW 4: MONEY SPENT ON STOCK & END-OF-DAY CASH/ONLINE RECONCILIATION -->
+    <div id="viewExpenses" class="space-y-6 hidden">
+      
+      <!-- End of Day Cash vs Online Reconciliation Summary -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Cash Drawer Reconciliation Card -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-amber-800/40 shadow-xl space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              💵 Physical Cash Drawer (Tonight Tally)
+            </span>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-700 px-2 py-0.5 rounded-full">Cash Balance</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between text-slate-300">
+              <span>(+) POS Cash Sales:</span>
+              <strong class="text-white mono" id="tallyPosCash">₹0.00</strong>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>(+) Kirana Cash Collections:</span>
+              <strong class="text-white mono" id="tallyKiranaCash">₹0.00</strong>
+            </div>
+            <div class="flex justify-between text-rose-400">
+              <span>(−) Cash Spent on Stock &amp; Expenses:</span>
+              <strong class="mono" id="tallyExpenseCash">₹0.00</strong>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-base font-bold text-white">
+              <span>Expected Cash in Drawer:</span>
+              <span class="text-2xl text-amber-400 mono" id="tallyNetCashDrawer">₹0.00</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500">Count physical paper currency &amp; coins in your cash box against this number tonight.</p>
+        </div>
+
+        <!-- Online / UPI Bank Reconciliation Card -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-sky-800/40 shadow-xl space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+              📱 Online / UPI Bank Settlements
+            </span>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full">Bank Balance</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between text-slate-300">
+              <span>(+) POS Online / UPI Sales:</span>
+              <strong class="text-white mono" id="tallyPosOnline">₹0.00</strong>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>(+) Kirana Online / UPI Received:</span>
+              <strong class="text-white mono" id="tallyKiranaOnline">₹0.00</strong>
+            </div>
+            <div class="flex justify-between text-rose-400">
+              <span>(−) Online Paid for Stock / Vendor:</span>
+              <strong class="mono" id="tallyExpenseOnline">₹0.00</strong>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-base font-bold text-white">
+              <span>Net Online Bank Inflow:</span>
+              <span class="text-2xl text-sky-400 mono" id="tallyNetOnlineBank">₹0.00</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500">Verify your PhonePe / Paytm / Bank statement credits against this amount.</p>
+        </div>
+
+      </div>
+
+      <!-- Money Spent on Stock & Shop Expense Entry Form -->
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+          <div>
+            <h2 class="text-base font-bold text-white">Log Stock Purchase or Shop Expense</h2>
+            <p class="text-xs text-slate-400">Record money paid to distributors, vendors, transport, ice, or covers</p>
+          </div>
+        </div>
+
+        <form id="expenseEntryForm" onsubmit="handleExpenseSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-1">
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Vendor / Item Name *</label>
+            <input type="text" id="expenseVendorName" required placeholder="e.g. Sangam Milk Inward, Ice, Poly covers" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Amount Paid (₹) *</label>
+            <input type="number" step="any" min="0.01" id="expenseAmount" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-emerald-400 mono font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Method *</label>
+            <select id="expenseMethod" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
+              <option value="Cash" selected>💵 Cash Payment</option>
+              <option value="Online">📱 Online / UPI / Bank</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Category</label>
+            <select id="expenseCategory" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option value="Stock Purchase">🥛 Dairy Stock Purchase</option>
+              <option value="Packaging & Covers">🛍️ Packaging &amp; Covers</option>
+              <option value="Ice & Chilling">🧊 Ice &amp; Chilling</option>
+              <option value="Transport">🚚 Transport &amp; Auto</option>
+              <option value="Electricity & Shop">💡 Electricity &amp; Shop Maintenance</option>
+              <option value="Other">📌 Other Expense</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-3">
+            <input type="text" id="expenseNote" placeholder="Notes (Optional, e.g. Morning 50L milk bill invoice #12)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="md:col-span-1 flex items-end">
+            <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
+              Add Expense / Bill
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Expense Records Table -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">Money Spent on Stock &amp; Expenses (<span id="expenseDateDisplay">--</span>)</h2>
+            <p class="text-xs text-slate-400">Total Spent Today: <strong class="text-rose-400 mono" id="totalExpenseAmountLabel">₹0.00</strong></p>
+          </div>
+          <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono" id="expenseCountBadge">0 Entries</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[10.5px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Time</th>
+                <th class="p-3">Vendor / Stock Item</th>
+                <th class="p-3">Category</th>
+                <th class="p-3 text-center">Payment Method</th>
+                <th class="p-3 text-right">Amount (₹)</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIEW 5: STOCK INVENTORY MASTER & PRODUCT CATALOG -->
     <div id="viewMaster" class="space-y-6 hidden">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
@@ -494,7 +641,6 @@
           </div>
         </div>
 
-        <!-- Catalog Live Counts Banner -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
           <div>
             <span class="text-[10px] text-slate-400 uppercase font-bold">Total Catalog Products</span>
@@ -514,7 +660,6 @@
           </div>
         </div>
 
-        <!-- Search Bar -->
         <div class="flex justify-between items-center">
           <input type="text" id="catalogSearchInput" placeholder="Search catalog by name or code..." oninput="renderMasterTable(this.value)" class="w-72 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           <span class="text-xs text-slate-400" id="masterTableCountLabel">Showing 0 products</span>
@@ -600,7 +745,7 @@
     <div id="barcodeSheetGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;"></div>
   </div>
 
-  <!-- Firebase Live Realtime Cloud Script & Honeywell Barcode Engine -->
+  <!-- Firebase Live Realtime Cloud Script & App Engine -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -641,7 +786,6 @@
       }
     }
 
-    // Default Master Items (Tea Milk removed; Cow Milk, Paneer, Lassi, Buttermilk added; Small Milk & Small Curd in Liters)
     const DEFAULT_MASTER_ITEMS = {
       tm: { name: "TM (Toned Milk 500ml)", barcode: "", section: "milk", unit: "LTR", agentPrice: 59.65, mrp: 65.00, shopRate: 60.00 },
       fcm: { name: "FCM (Full Cream 500ml)", barcode: "", section: "milk", unit: "LTR", agentPrice: 75.40, mrp: 81.00, shopRate: 76.00 },
@@ -659,15 +803,17 @@
       junnu: { name: "Junnu Cup 100g", barcode: "JN102", section: "nobarcode", unit: "CUP", agentPrice: 17.25, mrp: 22.00, shopRate: 19.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v9";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v9";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v9";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v9";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v10";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v10";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v10";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v10";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v10";
 
     let masterItems = {};
     let kiranaLogs = [];
     let stockDays = {};
     let posSalesLogs = [];
+    let expenseLogs = [];
     let posCart = {};
     let currentPayMode = 'Cash';
     let currentPosCategory = 'all';
@@ -689,7 +835,7 @@
       return getLocalDateString(d);
     }
 
-    // Audio Engine
+    // Supermarket Dual-Tone Beep
     function playBigBeep(success = true) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -750,12 +896,10 @@
         ? "px-2.5 py-1 rounded-lg font-bold transition bg-amber-600 text-white shadow"
         : "px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white";
 
-      showScanToast("Scanner Mode Changed", mode === 'pos' ? "Mode: Customer POS Billing" : "Mode: Quick Stock-In (+1 Inward)", true);
+      showScanToast("Scanner Mode", mode === 'pos' ? "Customer POS Billing" : "Quick Stock-In (+1 Inward)", true);
     };
 
-    // =========================================================================
-    // 🎧 HONEYWELL USB SCANNER KEYSTROKE BUFFER
-    // =========================================================================
+    // Honeywell Scanner Listener
     let globalBarcodeBuffer = "";
     let lastKeyStrokeTime = Date.now();
 
@@ -827,7 +971,6 @@
       }
     }
 
-    // Unmapped Barcode Modal
     function openUnmappedModal(code) {
       document.getElementById("unmappedCodeDisplay").innerText = code;
       document.getElementById("linkExistingContainer").classList.add("hidden");
@@ -887,15 +1030,17 @@
       }
     }
 
-    // =========================================================================
-    // ➕ ADD & EDIT PRODUCT MODAL CONTROLLER
-    // =========================================================================
+    // Add / Edit Product Modals
     window.openNewProductModal = function(initialBarcode = "") {
       document.getElementById("productModalTitle").innerText = "Add New Product to Shop";
       document.getElementById("productEntryForm").reset();
       document.getElementById("formProductKey").value = "";
       document.getElementById("formProductBarcode").value = initialBarcode || "";
       document.getElementById("formProductUnit").value = "LTR";
+      document.getElementById("formProductAgentCost").value = "";
+      document.getElementById("formProductMrp").value = "";
+      document.getElementById("formProductShopRate").value = "";
+      document.getElementById("formProductOpeningStock").value = "0";
       document.getElementById("initialStockRow").classList.remove("hidden");
       document.getElementById("saveProductBtn").innerText = "Save to Catalog";
       document.getElementById("productFormModal").classList.remove("hidden");
@@ -931,52 +1076,63 @@
       document.getElementById("formProductBarcode").value = code;
     };
 
+    // Corrected & Guarded Product Save Function
     window.handleProductFormSubmit = async function(e) {
       e.preventDefault();
-      const existingKey = document.getElementById("formProductKey").value;
-      const name = document.getElementById("formProductName").value.trim();
-      const barcode = document.getElementById("formProductBarcode").value.trim();
-      const section = document.getElementById("formProductSection").value;
-      const unit = (document.getElementById("formProductUnit").value.trim() || "LTR").toUpperCase();
-      const agentPrice = parseFloat(document.getElementById("formProductAgentCost").value) || 0;
-      const mrp = parseFloat(document.getElementById("formProductMrp").value) || 0;
-      const shopRate = parseFloat(document.getElementById("formProductShopRate").value) || mrp;
-      const initialStock = parseFloat(document.getElementById("formProductOpeningStock")?.value) || 0;
+      try {
+        const existingKey = document.getElementById("formProductKey").value;
+        const name = document.getElementById("formProductName").value.trim();
+        const barcode = document.getElementById("formProductBarcode").value.trim();
+        const section = document.getElementById("formProductSection").value;
+        const unit = (document.getElementById("formProductUnit").value.trim() || "LTR").toUpperCase();
+        const agentPrice = parseFloat(document.getElementById("formProductAgentCost").value) || 0;
+        const mrp = parseFloat(document.getElementById("formProductMrp").value) || 0;
+        const shopRate = parseFloat(document.getElementById("formProductShopRate").value) || mrp;
+        const initialStock = parseFloat(document.getElementById("formProductOpeningStock")?.value) || 0;
 
-      const key = existingKey || ("item_" + Date.now().toString(36) + "_" + name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6));
+        if (!name) {
+          alert("Please enter a valid product name.");
+          return;
+        }
 
-      masterItems[key] = {
-        name,
-        barcode,
-        section,
-        unit,
-        agentPrice,
-        mrp,
-        shopRate
-      };
+        const key = existingKey || ("item_" + Date.now().toString(36) + "_" + name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6));
 
-      const dateStr = getActiveDate();
-      if (!existingKey && initialStock > 0) {
-        if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
-        stockDays[dateStr][key] = {
-          opening: initialStock,
-          inward: 0,
-          leftover: initialStock,
-          home: 0
+        masterItems[key] = {
+          name,
+          barcode,
+          section,
+          unit,
+          agentPrice,
+          mrp,
+          shopRate
         };
-        await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+
+        const dateStr = getActiveDate();
+        if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+        if (!stockDays[dateStr][key]) {
+          stockDays[dateStr][key] = {
+            opening: initialStock,
+            inward: 0,
+            leftover: initialStock,
+            home: 0
+          };
+          await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        }
+
+        await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+
+        playBigBeep(true);
+        closeProductModal();
+        renderMasterTable();
+        renderPosGrid();
+        renderKiranaFormFields();
+        loadDateData();
+
+        showScanToast(existingKey ? "Product Updated" : "New Product Added", `${name} saved to catalog!`, true);
+      } catch (err) {
+        console.error("Error saving product to catalog:", err);
+        alert("Failed to save product: " + err.message);
       }
-
-      await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
-
-      playBigBeep(true);
-      closeProductModal();
-      renderMasterTable();
-      renderPosGrid();
-      renderKiranaFormFields();
-      loadDateData();
-
-      showScanToast(existingKey ? "Product Updated" : "New Product Added", `${name} added to Shop!`, true);
     };
 
     window.deleteMasterProduct = async function(itemKey) {
@@ -1019,7 +1175,6 @@
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">Def: ₹${Number(it.shopRate || it.mrp).toFixed(0)}</span>
           </div>
 
-          <!-- Quantity Stepper [-] Qty [+] -->
           <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-900">
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="stepKiranaQty('${k}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold flex items-center justify-center text-lg active:scale-95 transition border border-slate-700 select-none">-</button>
@@ -1029,7 +1184,6 @@
               <button type="button" onclick="stepKiranaQty('${k}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-extrabold flex items-center justify-center text-lg active:scale-95 transition border border-slate-700 select-none">+</button>
             </div>
 
-            <!-- Rate Input -->
             <div class="flex items-center gap-1">
               <span class="text-[10px] text-slate-500">₹/u:</span>
               <input type="number" min="0" step="any" id="krate_${k}" value="${it.shopRate || it.mrp}" placeholder="Rate" 
@@ -1042,7 +1196,6 @@
       });
     }
 
-    // Touch Stepper Function
     window.stepKiranaQty = function(itemKey, delta) {
       const input = document.getElementById(`kqty_${itemKey}`);
       if (!input) return;
@@ -1117,7 +1270,6 @@
       showScanToast("Kirana Saved", `Delivery logged for ${shopName}!`, true);
     };
 
-    // Quick text bulk parser updated with Cow Milk, Paneer, Lassi, Buttermilk, and Liter parsing
     const KIRANA_ALIAS_RULES = {
       'tm': 'tm',
       'toned': 'tm',
@@ -1261,7 +1413,11 @@
           }
         });
 
-        const isPaid = entry.paymentStatus === "Paid";
+        const status = entry.paymentStatus || "Not Paid";
+        let statusBadge = "bg-rose-950 text-rose-300 border border-rose-700";
+        if (status === "Paid (Cash)") statusBadge = "bg-amber-950 text-amber-300 border border-amber-700";
+        else if (status === "Paid (UPI / Online)" || status === "Paid") statusBadge = "bg-emerald-950 text-emerald-300 border border-emerald-700";
+
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-800/50 transition";
         tr.innerHTML = `
@@ -1273,8 +1429,8 @@
           <td class="p-3 text-right font-bold text-white mono text-xs md:text-sm">₹${billTotal.toFixed(2)}</td>
           <td class="p-3 text-right font-bold text-emerald-400 mono text-xs md:text-sm">₹${totalProfit.toFixed(2)}</td>
           <td class="p-3 text-center">
-            <button onclick="toggleKiranaPayment('${entry.id}')" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
-              ${entry.paymentStatus}
+            <button onclick="cycleKiranaPayment('${entry.id}')" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition ${statusBadge}">
+              ${status}
             </button>
           </td>
           <td class="p-3 text-center space-x-2">
@@ -1286,8 +1442,16 @@
       });
     }
 
-    window.toggleKiranaPayment = async function(id) {
-      kiranaLogs = kiranaLogs.map(l => l.id === id ? { ...l, paymentStatus: l.paymentStatus === 'Paid' ? 'Not Paid' : 'Paid' } : l);
+    window.cycleKiranaPayment = async function(id) {
+      kiranaLogs = kiranaLogs.map(l => {
+        if (l.id === id) {
+          let next = "Paid (Cash)";
+          if (l.paymentStatus === "Paid (Cash)") next = "Paid (UPI / Online)";
+          else if (l.paymentStatus === "Paid (UPI / Online)" || l.paymentStatus === "Paid") next = "Not Paid";
+          return { ...l, paymentStatus: next };
+        }
+        return l;
+      });
       await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
       loadDateData();
     };
@@ -1298,7 +1462,7 @@
 
       document.getElementById("editKiranaId").value = entry.id;
       document.getElementById("kiranaShopName").value = entry.shopName;
-      document.getElementById("kiranaPaymentStatus").value = entry.paymentStatus;
+      document.getElementById("kiranaPaymentStatus").value = entry.paymentStatus || "Not Paid";
       document.getElementById("kiranaNote").value = entry.note || "";
 
       Object.keys(masterItems).forEach(k => {
@@ -1339,6 +1503,86 @@
       if (!datalist) return;
       const unique = Array.from(new Set(kiranaLogs.map(l => l.shopName).filter(Boolean)));
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
+    }
+
+    // =========================================================================
+    // 💰 EXPENSE TRACKER CONTROLLER
+    // =========================================================================
+    window.handleExpenseSubmit = async function(e) {
+      e.preventDefault();
+      const dateStr = getActiveDate();
+      const vendor = document.getElementById("expenseVendorName").value.trim();
+      const amount = parseFloat(document.getElementById("expenseAmount").value) || 0;
+      const method = document.getElementById("expenseMethod").value;
+      const category = document.getElementById("expenseCategory").value;
+      const note = document.getElementById("expenseNote").value.trim();
+
+      if (amount <= 0) return alert("Please enter a valid expense amount.");
+
+      const expenseItem = {
+        id: "exp_" + Date.now(),
+        date: dateStr,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        vendor,
+        amount,
+        method,
+        category,
+        note
+      };
+
+      expenseLogs.push(expenseItem);
+      await cloudSet(CLOUD_KEY_EXPENSES, JSON.stringify(expenseLogs));
+
+      document.getElementById("expenseEntryForm").reset();
+      document.getElementById("expenseMethod").value = "Cash";
+      document.getElementById("expenseCategory").value = "Stock Purchase";
+
+      playBigBeep(true);
+      showScanToast("Expense Saved", `₹${amount.toFixed(2)} (${method}) for ${vendor}`, true);
+      loadDateData();
+    };
+
+    window.deleteExpenseEntry = async function(id) {
+      if (confirm("Delete this expense record?")) {
+        expenseLogs = expenseLogs.filter(e => e.id !== id);
+        await cloudSet(CLOUD_KEY_EXPENSES, JSON.stringify(expenseLogs));
+        loadDateData();
+      }
+    };
+
+    function renderExpenseTable(dayExpenses) {
+      const tbody = document.getElementById("expenseTableBody");
+      tbody.innerHTML = "";
+      document.getElementById("expenseCountBadge").innerText = `${dayExpenses.length} Entries`;
+
+      let totalExp = 0;
+      dayExpenses.forEach(exp => {
+        totalExp += Number(exp.amount) || 0;
+        const isCash = exp.method === 'Cash';
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 mono text-slate-400 text-[11px]">${exp.time || '--'}</td>
+          <td class="p-3">
+            <div class="font-bold text-white">${exp.vendor}</div>
+            ${exp.note ? `<div class="text-[10px] text-slate-400 mt-0.5">${exp.note}</div>` : ""}
+          </td>
+          <td class="p-3 text-slate-300 text-[11px]">${exp.category || 'Stock Purchase'}</td>
+          <td class="p-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isCash ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-sky-950 text-sky-300 border border-sky-800'}">
+              ${isCash ? '💵 Cash' : '📱 Online / UPI'}
+            </span>
+          </td>
+          <td class="p-3 text-right font-bold text-rose-400 mono text-sm">₹${Number(exp.amount).toFixed(2)}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteExpenseEntry('${exp.id}')" class="text-rose-400 hover:text-rose-300 font-semibold text-xs">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("totalExpenseAmountLabel").innerText = `₹${totalExp.toFixed(2)}`;
     }
 
     // =========================================================================
@@ -1525,7 +1769,6 @@
           total: qty * price
         });
 
-        // Live stock deduction
         if (stockDays[dateStr] && stockDays[dateStr][k]) {
           const currentLeft = Number(stockDays[dateStr][k].leftover) || 0;
           stockDays[dateStr][k].leftover = Math.max(0, currentLeft - qty);
@@ -1581,7 +1824,7 @@
     }
 
     // =========================================================================
-    // INVENTORY STOCK RECONCILIATION & AUTO ROLLOVER
+    // INVENTORY STOCK RECONCILIATION
     // =========================================================================
     function getOrInitDayStock(dateStr) {
       if (!stockDays[dateStr]) {
@@ -1599,6 +1842,22 @@
           };
         });
         cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      } else {
+        let hasNewKeys = false;
+        Object.keys(masterItems).forEach(k => {
+          if (!stockDays[dateStr][k]) {
+            stockDays[dateStr][k] = {
+              opening: 0,
+              inward: 0,
+              leftover: 0,
+              home: 0
+            };
+            hasNewKeys = true;
+          }
+        });
+        if (hasNewKeys) {
+          cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        }
       }
       return stockDays[dateStr];
     }
@@ -1612,13 +1871,17 @@
       document.getElementById("currentDayBadge").innerText = dayName;
       document.getElementById("stockDateDisplay").innerText = `${dateStr} (${dayName})`;
       document.getElementById("kiranaDateDisplay").innerText = `${dateStr} (${dayName})`;
+      document.getElementById("expenseDateDisplay").innerText = `${dateStr} (${dayName})`;
 
       const dayStock = getOrInitDayStock(dateStr);
       const dayKiranaEntries = kiranaLogs.filter(e => e.date === dateStr);
+      const dayExpenses = expenseLogs.filter(e => e.date === dateStr);
+      const dayPosSales = posSalesLogs.filter(e => e.date === dateStr);
 
       renderRetailStockTable(dayStock, dayKiranaEntries);
       renderKiranaTable(dayKiranaEntries);
-      calculateOverallDailyMetrics(dayStock, dayKiranaEntries);
+      renderExpenseTable(dayExpenses);
+      calculateOverallDailyMetrics(dayStock, dayKiranaEntries, dayExpenses, dayPosSales);
     }
 
     function getKiranaSentTotalPerItem(entries) {
@@ -1709,6 +1972,9 @@
       const dateStr = getActiveDate();
       const numVal = parseFloat(val) || 0;
       if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+      if (!stockDays[dateStr][itemKey]) {
+        stockDays[dateStr][itemKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+      }
 
       stockDays[dateStr][itemKey][field] = numVal;
 
@@ -1749,6 +2015,9 @@
           });
 
           if (matchedKey) {
+            if (!stockDays[dateStr][matchedKey]) {
+              stockDays[dateStr][matchedKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+            }
             stockDays[dateStr][matchedKey].leftover = qty;
             matchCount++;
           }
@@ -1767,26 +2036,71 @@
     };
 
     // =========================================================================
-    // OVERALL METRICS RECONCILIATION
+    // 📊 RECONCILIATION: CASH, ONLINE & OVERALL DAILY TOTALS
     // =========================================================================
-    function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
+    function calculateOverallDailyMetrics(dayStock, kiranaEntries, dayExpenses, dayPosSales) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
       let kiranaDue = 0;
+      let kiranaCashIn = 0;
+      let kiranaOnlineIn = 0;
 
       kiranaEntries.forEach(e => {
+        let entryBill = 0;
+        let entryCost = 0;
+
         Object.keys(masterItems).forEach(k => {
           const q = Number(e.items[k]?.qty) || 0;
           const r = Number(e.items[k]?.sellRate) || Number(masterItems[k].shopRate || masterItems[k].mrp);
           const cost = Number(masterItems[k].agentPrice) || 0;
           if (q > 0) {
-            const lineBill = q * r;
-            kiranaSales += lineBill;
-            kiranaProfit += (q * (r - cost));
-            if (e.paymentStatus !== "Paid") kiranaDue += lineBill;
+            entryBill += (q * r);
+            entryCost += (q * cost);
           }
         });
+
+        kiranaSales += entryBill;
+        kiranaProfit += (entryBill - entryCost);
+
+        const status = e.paymentStatus || "Not Paid";
+        if (status === "Paid (Cash)") kiranaCashIn += entryBill;
+        else if (status === "Paid (UPI / Online)" || status === "Paid") kiranaOnlineIn += entryBill;
+        else kiranaDue += entryBill;
       });
+
+      let posCashIn = 0;
+      let posOnlineIn = 0;
+      dayPosSales.forEach(sale => {
+        if (sale.paymentMode === 'Cash') posCashIn += (Number(sale.billTotal) || 0);
+        else posOnlineIn += (Number(sale.billTotal) || 0);
+      });
+
+      let expCashOut = 0;
+      let expOnlineOut = 0;
+      dayExpenses.forEach(exp => {
+        const amt = Number(exp.amount) || 0;
+        if (exp.method === 'Cash') expCashOut += amt;
+        else expOnlineOut += amt;
+      });
+
+      const netCashDrawer = (posCashIn + kiranaCashIn) - expCashOut;
+      const netOnlineBank = (posOnlineIn + kiranaOnlineIn) - expOnlineOut;
+
+      document.getElementById("tallyPosCash").innerText = `₹${posCashIn.toFixed(2)}`;
+      document.getElementById("tallyKiranaCash").innerText = `₹${kiranaCashIn.toFixed(2)}`;
+      document.getElementById("tallyExpenseCash").innerText = `₹${expCashOut.toFixed(2)}`;
+      document.getElementById("tallyNetCashDrawer").innerText = `₹${netCashDrawer.toFixed(2)}`;
+
+      document.getElementById("tallyPosOnline").innerText = `₹${posOnlineIn.toFixed(2)}`;
+      document.getElementById("tallyKiranaOnline").innerText = `₹${kiranaOnlineIn.toFixed(2)}`;
+      document.getElementById("tallyExpenseOnline").innerText = `₹${expOnlineOut.toFixed(2)}`;
+      document.getElementById("tallyNetOnlineBank").innerText = `₹${netOnlineBank.toFixed(2)}`;
+
+      document.getElementById("metricNetCashDrawer").innerText = `₹${netCashDrawer.toFixed(0)}`;
+      document.getElementById("subCashSummary").innerText = `In: ₹${(posCashIn + kiranaCashIn).toFixed(0)} | Out: ₹${expCashOut.toFixed(0)}`;
+
+      document.getElementById("metricNetOnlineBank").innerText = `₹${netOnlineBank.toFixed(0)}`;
+      document.getElementById("subOnlineSummary").innerText = `In: ₹${(posOnlineIn + kiranaOnlineIn).toFixed(0)} | Out: ₹${expOnlineOut.toFixed(0)}`;
 
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
       let retailSales = 0;
@@ -1980,6 +2294,13 @@
           renderDemandChart();
         }
       });
+
+      onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_EXPENSES), (docSnap) => {
+        if (docSnap.exists()) {
+          expenseLogs = JSON.parse(docSnap.data().value);
+          loadDateData();
+        }
+      });
     }
 
     async function initialLoad() {
@@ -1999,6 +2320,9 @@
       const pRes = await cloudGet(CLOUD_KEY_POS_LOGS);
       if (pRes && pRes.value) posSalesLogs = JSON.parse(pRes.value);
 
+      const eRes = await cloudGet(CLOUD_KEY_EXPENSES);
+      if (eRes && eRes.value) expenseLogs = JSON.parse(eRes.value);
+
       const defaultDate = getLocalDateString();
       document.getElementById("selectedDate").value = defaultDate;
 
@@ -2016,9 +2340,10 @@
       document.getElementById("viewKirana").classList.toggle("hidden", viewKey !== 'kirana');
       document.getElementById("viewPos").classList.toggle("hidden", viewKey !== 'pos');
       document.getElementById("viewRetail").classList.toggle("hidden", viewKey !== 'retail');
+      document.getElementById("viewExpenses").classList.toggle("hidden", viewKey !== 'expenses');
       document.getElementById("viewMaster").classList.toggle("hidden", viewKey !== 'master');
 
-      ['kirana', 'pos', 'retail', 'master'].forEach(k => {
+      ['kirana', 'pos', 'retail', 'expenses', 'master'].forEach(k => {
         const btn = document.getElementById(`tabBtn${k.charAt(0).toUpperCase() + k.slice(1)}`);
         if (btn) {
           btn.className = viewKey === k
