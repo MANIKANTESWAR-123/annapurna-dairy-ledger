@@ -6,7 +6,7 @@
   <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- HTML5 Mobile Camera Barcode Scanner Library -->
+  <!-- HTML5 Mobile Camera Barcode & QR Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -50,6 +50,27 @@
     </div>
   </div>
 
+  <!-- Mobile Camera Scanner Modal -->
+  <div id="cameraScannerModal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 relative shadow-2xl">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider" id="cameraModalTitle">Mobile Barcode &amp; QR Scanner</h3>
+        </div>
+        <button type="button" onclick="closeCameraScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+      </div>
+      
+      <div class="w-full bg-black rounded-xl overflow-hidden min-h-[260px] flex items-center justify-center border border-slate-800" id="cameraReader"></div>
+      
+      <p class="text-[11px] text-center text-slate-400" id="cameraHelpText">Point camera at packet barcode or QR code.</p>
+      
+      <button type="button" onclick="closeCameraScanner()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl uppercase tracking-wider transition">
+        Done / Close Camera
+      </button>
+    </div>
+  </div>
+
   <!-- Modal 1: Unmapped Barcode Detected -->
   <div id="unmappedBarcodeModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
@@ -80,7 +101,7 @@
     </div>
   </div>
 
-  <!-- Modal 2: Add / Edit Product Form -->
+  <!-- Modal 2: Add / Edit Product Form (with Camera Scan Option) -->
   <div id="productFormModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -100,7 +121,11 @@
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Barcode / EAN</label>
             <div class="flex gap-1.5">
-              <input type="text" id="formProductBarcode" placeholder="Scan barcode..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-400 mono font-bold focus:outline-none focus:border-sky-500">
+              <input type="text" id="formProductBarcode" placeholder="Scan or type barcode..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-400 mono font-bold focus:outline-none focus:border-sky-500">
+              <!-- 📷 Mobile Camera Scan button inside Product Form -->
+              <button type="button" onclick="openCameraScanner('form')" title="Scan with Phone Camera" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
+                <span>📷</span>
+              </button>
               <button type="button" onclick="genFormShortcode()" title="Generate Shortcode" class="px-2.5 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-bold">⚡</button>
             </div>
           </div>
@@ -163,13 +188,16 @@
             ☁️ Cloud Live Sync
           </span>
 
-          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
-            <span class="text-slate-400 font-semibold px-2">Scanner:</span>
-            <button type="button" id="scanModePosBtn" onclick="setScannerMode('pos')" class="px-2.5 py-1 rounded-lg font-bold transition bg-emerald-600 text-white shadow">
+          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px] gap-1">
+            <span class="text-slate-400 font-semibold px-1">Scanner:</span>
+            <button type="button" id="scanModePosBtn" onclick="setScannerMode('pos')" class="px-2 py-0.5 rounded-lg font-bold transition bg-emerald-600 text-white shadow">
               🛒 POS Bill
             </button>
-            <button type="button" id="scanModeStockBtn" onclick="setScannerMode('stock')" class="px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white">
-              📦 Stock-In (+1)
+            <button type="button" id="scanModeStockBtn" onclick="setScannerMode('stock')" class="px-2 py-0.5 rounded-lg font-bold transition text-slate-400 hover:text-white">
+              📦 Stock-In
+            </button>
+            <button type="button" onclick="openCameraScanner(scannerMode)" class="px-2.5 py-0.5 rounded-lg font-bold bg-sky-600 hover:bg-sky-500 text-white text-xs flex items-center gap-1 shadow">
+              <span>📷</span> Phone Scan
             </button>
           </div>
         </div>
@@ -291,13 +319,11 @@
             </div>
           </div>
 
-          <!-- Dynamic Products Grid with Stepper Controls -->
           <div class="space-y-3 pt-2">
             <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities</span>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer"></div>
           </div>
 
-          <!-- Live Total & Submit -->
           <div class="flex flex-col md:flex-row justify-between items-center p-3.5 bg-slate-800 rounded-xl border border-slate-700 gap-3">
             <div class="text-xs text-slate-300 flex items-center gap-4">
               <span>Shop Bill: <strong class="text-white text-base mono" id="liveKiranaBill">₹0.00</strong></span>
@@ -311,7 +337,6 @@
         </form>
       </div>
 
-      <!-- Kirana Register Table -->
       <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
@@ -345,11 +370,16 @@
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
             <h2 class="text-lg font-bold text-white">⚡ POS Counter Billing</h2>
-            <p class="text-xs text-slate-400">Swipe item across Honeywell scanner or tap buttons below</p>
+            <p class="text-xs text-slate-400">Swipe Honeywell scanner or use mobile camera scan below</p>
           </div>
-          <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
-            <span class="text-xs">🔍</span>
-            <input type="text" id="posBarcodeInput" placeholder="Manual Code / Name..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36" oninput="handlePosSearch(this.value)">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openCameraScanner('pos')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+              <span>📷</span> Phone Camera
+            </button>
+            <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
+              <span class="text-xs">🔍</span>
+              <input type="text" id="posBarcodeInput" placeholder="Manual Code / Name..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36" oninput="handlePosSearch(this.value)">
+            </div>
           </div>
         </div>
 
@@ -381,7 +411,7 @@
           </div>
 
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
-            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>
+            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with scanner or camera to start billing.</div>
           </div>
         </div>
 
@@ -783,7 +813,6 @@
       }
     }
 
-    // Zero default products: Clean slate so you can add your own shop products manually
     const DEFAULT_MASTER_ITEMS = {};
 
     const CLOUD_KEY_MASTER = "annapurna_cloud_master_v11";
@@ -805,9 +834,13 @@
     let scannerMode = 'pos';
     let pendingUnmappedBarcode = "";
 
-    // =========================================================================
-    // 🛡️ ULTRA-SAFE DOM SETTER (PREVENTS NULL POINTER EXCEPTIONS)
-    // =========================================================================
+    // Camera Scanner state
+    let html5QrScannerInstance = null;
+    let cameraScanTarget = 'pos'; // 'pos' | 'stock' | 'form'
+    let lastCameraCode = "";
+    let lastCameraScanTime = 0;
+
+    // 🛡️ ULTRA-SAFE DOM SETTER
     function setText(id, val) {
       const el = document.getElementById(id);
       if (el) el.innerText = val;
@@ -927,18 +960,98 @@
     }
     window.showScanToast = showScanToast;
 
+    // =========================================================================
+    // 📷 MOBILE CAMERA BARCODE & QR SCANNER ENGINE
+    // =========================================================================
+    window.openCameraScanner = async function(target = 'pos') {
+      cameraScanTarget = target;
+      const modal = document.getElementById("cameraScannerModal");
+      if (modal) modal.classList.remove("hidden");
+
+      if (target === 'form') {
+        setText("cameraModalTitle", "Scan Barcode for Product Form");
+        setText("cameraHelpText", "Point camera at packet barcode or QR code. It will auto-fill the form.");
+      } else {
+        setText("cameraModalTitle", "Mobile Barcode & QR Scanner");
+        setText("cameraHelpText", "Point camera at product barcode or QR code.");
+      }
+
+      if (!html5QrScannerInstance) {
+        html5QrScannerInstance = new Html5Qrcode("cameraReader");
+      }
+
+      const scanConfig = {
+        fps: 15,
+        qrbox: { width: 250, height: 160 },
+        aspectRatio: 1.0,
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.QR_CODE
+        ]
+      };
+
+      try {
+        await html5QrScannerInstance.start(
+          { facingMode: "environment" },
+          scanConfig,
+          (decodedText) => {
+            handleCameraDecoded(decodedText);
+          },
+          () => {}
+        );
+      } catch (err) {
+        console.error("Camera access failed:", err);
+        alert("Camera permission denied or camera unavailable: " + err);
+        closeCameraScanner();
+      }
+    };
+
+    window.closeCameraScanner = async function() {
+      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
+        try {
+          await html5QrScannerInstance.stop();
+        } catch (e) {}
+      }
+      const modal = document.getElementById("cameraScannerModal");
+      if (modal) modal.classList.add("hidden");
+    };
+
+    function handleCameraDecoded(decodedText) {
+      const now = Date.now();
+      if (decodedText === lastCameraCode && (now - lastCameraScanTime) < 1800) return;
+      lastCameraCode = decodedText;
+      lastCameraScanTime = now;
+
+      playBigBeep(true);
+
+      if (cameraScanTarget === 'form') {
+        const barEl = document.getElementById("formProductBarcode");
+        if (barEl) barEl.value = decodedText.trim();
+        showScanToast("Barcode Captured", `Code: ${decodedText}`, true);
+        closeCameraScanner();
+        return;
+      }
+
+      processHoneywellBarcode(decodedText.trim());
+    }
+
     window.setScannerMode = function(mode) {
       scannerMode = mode;
       const posBtn = document.getElementById("scanModePosBtn");
       const stockBtn = document.getElementById("scanModeStockBtn");
 
       if (posBtn) posBtn.className = mode === 'pos'
-        ? "px-2.5 py-1 rounded-lg font-bold transition bg-emerald-600 text-white shadow"
-        : "px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white";
+        ? "px-2 py-0.5 rounded-lg font-bold transition bg-emerald-600 text-white shadow"
+        : "px-2 py-0.5 rounded-lg font-bold transition text-slate-400 hover:text-white";
 
       if (stockBtn) stockBtn.className = mode === 'stock'
-        ? "px-2.5 py-1 rounded-lg font-bold transition bg-amber-600 text-white shadow"
-        : "px-2.5 py-1 rounded-lg font-bold transition text-slate-400 hover:text-white";
+        ? "px-2 py-0.5 rounded-lg font-bold transition bg-amber-600 text-white shadow"
+        : "px-2 py-0.5 rounded-lg font-bold transition text-slate-400 hover:text-white";
 
       showScanToast("Scanner Mode", mode === 'pos' ? "Customer POS Billing" : "Quick Stock-In (+1 Inward)", true);
     };
@@ -1241,7 +1354,7 @@
       if (keys.length === 0) {
         container.innerHTML = `
           <div class="col-span-full text-center py-8 text-slate-500 text-xs">
-            No products in catalog yet. Click <b>"+ Add New Product"</b> above or swipe Honeywell scanner to add items!
+            No products in catalog yet. Click <b>"+ Add New Product"</b> above or scan packet to add items!
           </div>
         `;
         return;
@@ -1655,7 +1768,7 @@
       if (keys.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full text-center py-12 text-slate-500 text-xs">
-            No products in catalog. Tap <b>"⚙️ Price & Catalog"</b> to add your products or swipe with Honeywell scanner!
+            No products in catalog. Tap <b>"⚙️ Price & Catalog"</b> to add your products or scan with Honeywell/phone camera!
           </div>
         `;
         return;
@@ -1761,7 +1874,7 @@
       setText("cartItemCountLabel", `${keys.length} product(s)`);
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with scanner or camera to start billing.</div>`;
         setText("posBillSubtotal", "₹0.00");
         setText("posBillProfit", "₹0.00");
         setText("posBillTotal", "₹0.00");
@@ -2444,7 +2557,7 @@
           const sent = kiranaSent[k] || 0;
           kVol += sent;
 
-          const stockData = dayStock[k] || { opening: 0, inward: 0, leftover: 0, home: 0 };
+          const stockData = (dayStock && dayStock[k]) ? dayStock[k] : { opening: 0, inward: 0, leftover: 0, home: 0 };
           const totalAvail = (Number(stockData.opening) || 0) + (Number(stockData.inward) || 0);
           const left = Number(stockData.leftover) || 0;
           const home = Number(stockData.home) || 0;
