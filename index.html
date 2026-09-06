@@ -473,8 +473,6 @@
 
     <!-- VIEW 4: MONEY SPENT ON STOCK & END-OF-DAY CASH/ONLINE RECONCILIATION -->
     <div id="viewExpenses" class="space-y-6 hidden">
-      
-      <!-- End of Day Cash vs Online Reconciliation Summary -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         <!-- Cash Drawer Reconciliation Card -->
@@ -539,7 +537,7 @@
 
       </div>
 
-      <!-- Money Spent on Stock & Shop Expense Entry Form -->
+      <!-- Expense Entry Form -->
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-2 border-b border-slate-800">
           <div>
@@ -822,25 +820,66 @@
     let scannerMode = 'pos';
     let pendingUnmappedBarcode = "";
 
+    // =========================================================================
+    // 🌐 CORE DATE & STOCK RESOLVERS (DECLARED AT TOP AND ATTACHED TO WINDOW)
+    // =========================================================================
     function getLocalDateString(d = new Date()) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
+    window.getLocalDateString = getLocalDateString;
 
     function shiftDate(dateStr, deltaDays) {
       const d = new Date(dateStr + "T00:00:00");
       d.setDate(d.getDate() + deltaDays);
       return getLocalDateString(d);
     }
+    window.shiftDate = shiftDate;
 
-    // Core Active Date getter
     function getActiveDate() {
       const el = document.getElementById("selectedDate");
       return (el && el.value) ? el.value : getLocalDateString();
     }
     window.getActiveDate = getActiveDate;
+
+    function getOrInitDayStock(dateStr) {
+      if (!stockDays[dateStr]) {
+        const prevDate = shiftDate(dateStr, -1);
+        const prevStock = stockDays[prevDate];
+
+        stockDays[dateStr] = {};
+        Object.keys(masterItems).forEach(k => {
+          const openingQty = prevStock && prevStock[k] ? (Number(prevStock[k].leftover) || 0) : 0;
+          stockDays[dateStr][k] = {
+            opening: openingQty,
+            inward: 0,
+            leftover: openingQty,
+            home: 0
+          };
+        });
+        cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      } else {
+        let hasNewKeys = false;
+        Object.keys(masterItems).forEach(k => {
+          if (!stockDays[dateStr][k]) {
+            stockDays[dateStr][k] = {
+              opening: 0,
+              inward: 0,
+              leftover: 0,
+              home: 0
+            };
+            hasNewKeys = true;
+          }
+        });
+        if (hasNewKeys) {
+          cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        }
+      }
+      return stockDays[dateStr];
+    }
+    window.getOrInitDayStock = getOrInitDayStock;
 
     // Supermarket Dual-Tone Beep
     function playBigBeep(success = true) {
@@ -878,6 +917,7 @@
         }
       } catch(e) {}
     }
+    window.playBigBeep = playBigBeep;
 
     function showScanToast(title, msg, isSuccess = true) {
       const toast = document.getElementById("scanNotificationToast");
@@ -892,6 +932,7 @@
         toast.className = "fixed top-4 right-4 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
       }, 1900);
     }
+    window.showScanToast = showScanToast;
 
     window.setScannerMode = function(mode) {
       scannerMode = mode;
@@ -1085,7 +1126,7 @@
 
     // Corrected & Robust Product Save Handler
     window.handleProductFormSubmit = async function(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       try {
         const existingKey = document.getElementById("formProductKey").value;
         const name = document.getElementById("formProductName").value.trim();
@@ -1115,17 +1156,17 @@
         };
 
         const dateStr = getActiveDate();
-        if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
-        if (!stockDays[dateStr][key]) {
-          stockDays[dateStr][key] = {
+        const dayStock = getOrInitDayStock(dateStr);
+        if (dayStock && !dayStock[key]) {
+          dayStock[key] = {
             opening: initialStock,
             inward: 0,
             leftover: initialStock,
             home: 0
           };
-        } else if (initialStock > 0 && !existingKey) {
-          stockDays[dateStr][key].opening = initialStock;
-          stockDays[dateStr][key].leftover = initialStock;
+        } else if (dayStock && initialStock > 0 && !existingKey) {
+          dayStock[key].opening = initialStock;
+          dayStock[key].leftover = initialStock;
         }
 
         await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
@@ -1205,6 +1246,7 @@
         container.appendChild(card);
       });
     }
+    window.renderKiranaFormFields = renderKiranaFormFields;
 
     window.stepKiranaQty = function(itemKey, delta) {
       const input = document.getElementById(`kqty_${itemKey}`);
@@ -1451,6 +1493,7 @@
         tbody.appendChild(tr);
       });
     }
+    window.renderKiranaTable = renderKiranaTable;
 
     window.cycleKiranaPayment = async function(id) {
       kiranaLogs = kiranaLogs.map(l => {
@@ -1514,6 +1557,7 @@
       const unique = Array.from(new Set(kiranaLogs.map(l => l.shopName).filter(Boolean)));
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
     }
+    window.updateShopDatalist = updateShopDatalist;
 
     // =========================================================================
     // 💰 EXPENSE TRACKER CONTROLLER
@@ -1594,10 +1638,428 @@
 
       document.getElementById("totalExpenseAmountLabel").innerText = `₹${totalExp.toFixed(2)}`;
     }
+    window.renderExpenseTable = renderExpenseTable;
 
     // =========================================================================
-    // 📊 RECONCILIATION: CASH, ONLINE & OVERALL DAILY TOTALS
+    // POS BILLING CONTROLLER
     // =========================================================================
+    function renderPosGrid() {
+      const grid = document.getElementById("posProductGrid");
+      grid.innerHTML = "";
+
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        if (currentPosCategory === 'nobarcode' && it.section !== 'nobarcode' && it.barcode && it.barcode.length > 5) return;
+        if (currentPosCategory !== 'all' && currentPosCategory !== 'nobarcode' && it.section !== currentPosCategory) return;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "p-3 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 active:scale-95 transition text-left flex flex-col justify-between h-24 shadow";
+        btn.onclick = () => {
+          playBigBeep(true);
+          addToCart(k);
+        };
+
+        let badgeColor = "text-sky-400";
+        if (it.section === "curd") badgeColor = "text-amber-400";
+        if (it.section === "bucket") badgeColor = "text-indigo-400";
+        if (it.section === "paneer") badgeColor = "text-emerald-400";
+        if (it.section === "drinks") badgeColor = "text-purple-400";
+        if (it.section === "nobarcode") badgeColor = "text-rose-400";
+
+        btn.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${it.section}</span>
+              ${it.barcode ? `<span class="text-[9px] text-slate-400 font-mono">🏷️${it.barcode}</span>` : ''}
+            </div>
+            <div class="text-xs font-bold text-white leading-tight mt-0.5">${it.name}</div>
+          </div>
+          <div class="flex justify-between items-center pt-1 border-t border-slate-700/60 mono text-xs font-bold text-emerald-400">
+            <span>MRP:</span>
+            <span>₹${Number(it.mrp).toFixed(2)}</span>
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+    window.renderPosGrid = renderPosGrid;
+
+    window.filterPosCategory = function(cat) {
+      currentPosCategory = cat;
+      renderPosGrid();
+    };
+
+    window.handlePosSearch = function(query) {
+      const q = query.trim().toLowerCase();
+      const grid = document.getElementById("posProductGrid");
+      grid.innerHTML = "";
+
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        if (!q || k.toLowerCase().includes(q) || it.name.toLowerCase().includes(q) || (it.barcode && it.barcode.toLowerCase().includes(q))) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "p-3 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 active:scale-95 transition text-left flex flex-col justify-between h-24 shadow";
+          btn.onclick = () => {
+            playBigBeep(true);
+            addToCart(k);
+          };
+          btn.innerHTML = `
+            <div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${it.section}</div>
+              <div class="text-xs font-bold text-white leading-tight mt-0.5">${it.name}</div>
+            </div>
+            <div class="flex justify-between items-center pt-1 border-t border-slate-700/60 mono text-xs font-bold text-emerald-400">
+              <span>MRP:</span>
+              <span>₹${Number(it.mrp).toFixed(2)}</span>
+            </div>
+          `;
+          grid.appendChild(btn);
+        }
+      });
+    };
+
+    window.addToCart = function(itemKey) {
+      posCart[itemKey] = (posCart[itemKey] || 0) + 1;
+      renderCart();
+    };
+
+    window.updateCartQty = function(itemKey, delta) {
+      if (!posCart[itemKey]) return;
+      posCart[itemKey] += delta;
+      if (posCart[itemKey] <= 0) delete posCart[itemKey];
+      renderCart();
+    };
+
+    window.clearCart = function() {
+      posCart = {};
+      renderCart();
+    };
+
+    function renderCart() {
+      const container = document.getElementById("cartItemsContainer");
+      container.innerHTML = "";
+
+      const keys = Object.keys(posCart);
+      document.getElementById("cartItemCountLabel").innerText = `${keys.length} product(s)`;
+
+      if (keys.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>`;
+        document.getElementById("posBillSubtotal").innerText = "₹0.00";
+        document.getElementById("posBillProfit").innerText = "₹0.00";
+        document.getElementById("posBillTotal").innerText = "₹0.00";
+        return;
+      }
+
+      let subtotal = 0;
+      let profit = 0;
+
+      keys.forEach(k => {
+        const it = masterItems[k];
+        const qty = posCart[k];
+        const lineTotal = qty * Number(it.mrp);
+        const lineProfit = qty * (Number(it.mrp) - Number(it.agentPrice));
+
+        subtotal += lineTotal;
+        profit += lineProfit;
+
+        const row = document.createElement("div");
+        row.className = "flex justify-between items-center bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl text-xs";
+        row.innerHTML = `
+          <div class="flex-1 pr-2">
+            <div class="font-bold text-white">${it.name}</div>
+            <div class="text-[10px] text-slate-400 mono">₹${Number(it.mrp).toFixed(2)} / unit</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="updateCartQty('${k}', -1)" class="w-6 h-6 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 font-bold flex items-center justify-center">-</button>
+            <span class="mono font-bold text-white px-1">${qty}</span>
+            <button type="button" onclick="updateCartQty('${k}', 1)" class="w-6 h-6 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 font-bold flex items-center justify-center">+</button>
+            <span class="mono font-bold text-emerald-400 w-16 text-right">₹${lineTotal.toFixed(2)}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById("posBillSubtotal").innerText = `₹${subtotal.toFixed(2)}`;
+      document.getElementById("posBillProfit").innerText = `₹${profit.toFixed(2)}`;
+      document.getElementById("posBillTotal").innerText = `₹${subtotal.toFixed(2)}`;
+    }
+    window.renderCart = renderCart;
+
+    window.selectPayMode = function(mode) {
+      currentPayMode = mode;
+      document.getElementById("payModeCashBtn").className = mode === 'Cash'
+        ? "py-2 rounded-xl text-xs font-bold uppercase transition bg-amber-600 text-white shadow"
+        : "py-2 rounded-xl text-xs font-bold uppercase transition bg-slate-800 text-slate-300 hover:text-white border border-slate-700";
+
+      document.getElementById("payModeUpiBtn").className = mode === 'UPI'
+        ? "py-2 rounded-xl text-xs font-bold uppercase transition bg-emerald-600 text-white shadow"
+        : "py-2 rounded-xl text-xs font-bold uppercase transition bg-slate-800 text-slate-300 hover:text-white border border-slate-700";
+    };
+
+    window.checkoutPOS = async function() {
+      const keys = Object.keys(posCart);
+      if (keys.length === 0) return alert("Cart is empty! Scan barcodes or tap products first.");
+
+      const dateStr = getActiveDate();
+      const custName = document.getElementById("posCustomerName").value.trim() || "Retail Walk-In";
+      const custPhone = document.getElementById("posCustomerPhone").value.trim() || "";
+
+      let billTotal = 0;
+      let totalCost = 0;
+      const itemsPurchased = [];
+
+      keys.forEach(k => {
+        const it = masterItems[k];
+        const qty = posCart[k];
+        const price = Number(it.mrp);
+        const cost = Number(it.agentPrice);
+        billTotal += (qty * price);
+        totalCost += (qty * cost);
+
+        itemsPurchased.push({
+          key: k,
+          name: it.name,
+          qty,
+          price,
+          total: qty * price
+        });
+
+        if (stockDays[dateStr] && stockDays[dateStr][k]) {
+          const currentLeft = Number(stockDays[dateStr][k].leftover) || 0;
+          stockDays[dateStr][k].leftover = Math.max(0, currentLeft - qty);
+        }
+      });
+
+      const posSale = {
+        id: "pos_" + Date.now(),
+        date: dateStr,
+        timestamp: new Date().toLocaleTimeString(),
+        customerName: custName,
+        customerPhone: custPhone,
+        paymentMode: currentPayMode,
+        items: itemsPurchased,
+        billTotal,
+        profit: billTotal - totalCost
+      };
+
+      posSalesLogs.push(posSale);
+
+      await cloudSet(CLOUD_KEY_POS_LOGS, JSON.stringify(posSalesLogs));
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+
+      printReceiptSlip(posSale);
+
+      clearCart();
+      document.getElementById("posCustomerName").value = "";
+      document.getElementById("posCustomerPhone").value = "";
+      loadDateData();
+      renderDemandChart();
+    };
+
+    function printReceiptSlip(sale) {
+      document.getElementById("receiptDateTime").innerText = `${sale.date} ${sale.timestamp}`;
+      document.getElementById("receiptCustName").innerText = sale.customerName;
+      document.getElementById("receiptPayMode").innerText = sale.paymentMode;
+
+      const tbody = document.getElementById("receiptItemsTable");
+      tbody.innerHTML = "";
+      sale.items.forEach(it => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${it.name.split(' ')[0]}</td>
+          <td style="text-align:center;">${it.qty}</td>
+          <td style="text-align:right;">₹${it.price}</td>
+          <td style="text-align:right;">₹${it.total.toFixed(0)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("receiptTotalAmount").innerText = `₹${sale.billTotal.toFixed(2)}`;
+      window.print();
+    }
+    window.printReceiptSlip = printReceiptSlip;
+
+    // =========================================================================
+    // 📊 RECONCILIATION & STOCK DATA
+    // =========================================================================
+    function loadDateData() {
+      const dateStr = getActiveDate();
+      const dObj = new Date(dateStr + "T00:00:00");
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[dObj.getDay()] || "";
+
+      document.getElementById("currentDayBadge").innerText = dayName;
+      document.getElementById("stockDateDisplay").innerText = `${dateStr} (${dayName})`;
+      document.getElementById("kiranaDateDisplay").innerText = `${dateStr} (${dayName})`;
+      document.getElementById("expenseDateDisplay").innerText = `${dateStr} (${dayName})`;
+
+      const dayStock = getOrInitDayStock(dateStr);
+      const dayKiranaEntries = kiranaLogs.filter(e => e.date === dateStr);
+      const dayExpenses = expenseLogs.filter(e => e.date === dateStr);
+      const dayPosSales = posSalesLogs.filter(e => e.date === dateStr);
+
+      renderRetailStockTable(dayStock, dayKiranaEntries);
+      renderKiranaTable(dayKiranaEntries);
+      renderExpenseTable(dayExpenses);
+      calculateOverallDailyMetrics(dayStock, dayKiranaEntries, dayExpenses, dayPosSales);
+    }
+    window.loadDateData = loadDateData;
+
+    function getKiranaSentTotalPerItem(entries) {
+      const totals = {};
+      Object.keys(masterItems).forEach(k => totals[k] = 0);
+      entries.forEach(e => {
+        Object.keys(masterItems).forEach(k => {
+          totals[k] += Number(e.items[k]?.qty) || 0;
+        });
+      });
+      return totals;
+    }
+    window.getKiranaSentTotalPerItem = getKiranaSentTotalPerItem;
+
+    function renderRetailStockTable(dayStock, kiranaEntries) {
+      const tbody = document.getElementById("retailStockTableBody");
+      tbody.innerHTML = "";
+
+      const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
+      let totalFridgeUnits = 0;
+
+      Object.keys(masterItems).forEach(k => {
+        const item = masterItems[k];
+        const stockData = dayStock[k] || { opening: 0, inward: 0, leftover: 0, home: 0 };
+
+        const opening = Number(stockData.opening) || 0;
+        const inward = Number(stockData.inward) || 0;
+        const totalAvail = opening + inward;
+        const sentToKirana = kiranaSent[k] || 0;
+        const leftover = Number(stockData.leftover) || 0;
+        const home = Number(stockData.home) || 0;
+
+        totalFridgeUnits += leftover;
+
+        const retailCustSold = Math.max(0, totalAvail - sentToKirana - leftover - home);
+        const retailRevenue = retailCustSold * Number(item.mrp);
+        const retailProfit = retailCustSold * (Number(item.mrp) - Number(item.agentPrice));
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-white">
+            <div>${item.name}</div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider">${item.unit}</span>
+              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${item.barcode}</span>` : ''}
+            </div>
+          </td>
+          <td class="p-3 text-center mono text-[11px]">
+            <span class="text-slate-400">₹${Number(item.agentPrice).toFixed(2)}</span> / 
+            <span class="text-emerald-400 font-bold">₹${Number(item.mrp).toFixed(2)}</span>
+          </td>
+          <td class="p-3 text-center bg-slate-900/60">
+            <input type="number" step="any" min="0" value="${opening}" 
+              class="w-16 bg-slate-800 border border-slate-700 text-center px-1.5 py-1 rounded text-white mono font-bold focus:border-emerald-500"
+              onchange="updateStockField('${k}', 'opening', this.value)">
+          </td>
+          <td class="p-3 text-center bg-slate-900/60">
+            <input type="number" step="any" min="0" value="${inward}" 
+              class="w-16 bg-slate-800 border border-slate-700 text-center px-1.5 py-1 rounded text-sky-300 mono font-bold focus:border-emerald-500"
+              onchange="updateStockField('${k}', 'inward', this.value)">
+          </td>
+          <td class="p-3 text-center font-bold text-white mono">${totalAvail}</td>
+          <td class="p-3 text-center font-bold text-amber-300 mono">${sentToKirana}</td>
+          <td class="p-3 text-center bg-sky-950/30">
+            <input type="number" step="any" min="0" value="${leftover}" 
+              class="w-16 bg-slate-800 border border-sky-600 text-center px-1.5 py-1 rounded text-sky-300 mono font-bold focus:outline-none focus:ring-1 focus:ring-sky-400"
+              onchange="updateStockField('${k}', 'leftover', this.value)">
+          </td>
+          <td class="p-3 text-center">
+            <input type="number" step="any" min="0" value="${home}" 
+              class="w-14 bg-slate-800 border border-slate-700 text-center px-1.5 py-1 rounded text-slate-300 mono"
+              onchange="updateStockField('${k}', 'home', this.value)">
+          </td>
+          <td class="p-3 text-center font-bold text-emerald-300 mono bg-emerald-950/30 text-sm">
+            ${retailCustSold}
+          </td>
+          <td class="p-3 text-right mono font-bold text-white">₹${retailRevenue.toFixed(2)}</td>
+          <td class="p-3 text-right mono font-bold text-emerald-400">₹${retailProfit.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const statFridge = document.getElementById("statTotalFridgeStock");
+      if (statFridge) statFridge.innerText = totalFridgeUnits;
+    }
+    window.renderRetailStockTable = renderRetailStockTable;
+
+    window.updateStockField = async function(itemKey, field, val) {
+      const dateStr = getActiveDate();
+      const numVal = parseFloat(val) || 0;
+      if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+      if (!stockDays[dateStr][itemKey]) {
+        stockDays[dateStr][itemKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+      }
+
+      stockDays[dateStr][itemKey][field] = numVal;
+
+      if (field === 'inward' || field === 'opening') {
+        const kiranaSent = getKiranaSentTotalPerItem(kiranaLogs.filter(e => e.date === dateStr))[itemKey] || 0;
+        const total = (Number(stockDays[dateStr][itemKey].opening) || 0) + (Number(stockDays[dateStr][itemKey].inward) || 0);
+        stockDays[dateStr][itemKey].leftover = Math.max(0, total - kiranaSent);
+      }
+
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      loadDateData();
+      renderDemandChart();
+    };
+
+    window.saveDayStockRecord = async function() {
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      alert(`Stock inventory and in-store customer sales synced to cloud for ${getActiveDate()}!`);
+    };
+
+    window.applyQuickLeftovers = async function() {
+      const text = document.getElementById("quickLeftoverText").value.trim();
+      if (!text) return alert("Please enter leftover lines (e.g. tm 10, cowmilk 4, smilk 5).");
+
+      const dateStr = getActiveDate();
+      const lines = text.split("\n");
+      let matchCount = 0;
+
+      lines.forEach(line => {
+        const m = line.trim().match(/^(.+?)(?:[-\s:]+)(\d+(?:\.\d+)?)$/i);
+        if (m) {
+          const rawKey = m[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+          const qty = parseFloat(m[2]) || 0;
+
+          const matchedKey = Object.keys(masterItems).find(k => {
+            const cleanK = k.toLowerCase();
+            const cleanName = masterItems[k].name.toLowerCase();
+            return cleanK === rawKey || cleanName.includes(rawKey) || (rawKey === 'tm' && k === 'tm') || (rawKey === 'fcm' && k === 'fcm');
+          });
+
+          if (matchedKey) {
+            if (!stockDays[dateStr][matchedKey]) {
+              stockDays[dateStr][matchedKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+            }
+            stockDays[dateStr][matchedKey].leftover = qty;
+            matchCount++;
+          }
+        }
+      });
+
+      if (matchCount > 0) {
+        await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        document.getElementById("quickLeftoverText").value = "";
+        loadDateData();
+        renderDemandChart();
+        alert(`Updated leftovers for ${matchCount} items! In-store retail customer sales recalculated.`);
+      } else {
+        alert("Could not match product names. Please use formats like: tm 10, cowmilk 4, smilk 5, paneer 2");
+      }
+    };
+
     function calculateOverallDailyMetrics(dayStock, kiranaEntries, dayExpenses, dayPosSales) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
@@ -1712,6 +2174,7 @@
 
       document.getElementById("metricLeftoversTotal").innerText = `${totalLeftovers} Pkts`;
     }
+    window.calculateOverallDailyMetrics = calculateOverallDailyMetrics;
 
     // =========================================================================
     // MASTER CATALOG TABLE & STATS DASHBOARD
@@ -1777,6 +2240,7 @@
       document.getElementById("statBarcodedItems").innerText = barcodedCount;
       document.getElementById("statUnbarcodedItems").innerText = unbarcodedCount;
     }
+    window.renderMasterTable = renderMasterTable;
 
     window.printCounterBarcodeSheet = function() {
       const grid = document.getElementById("barcodeSheetGrid");
