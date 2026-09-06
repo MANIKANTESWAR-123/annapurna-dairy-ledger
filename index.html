@@ -6,8 +6,6 @@
   <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- HTML5 Mobile Camera Barcode Scanner Library -->
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'IBM Plex Sans', sans-serif; }
@@ -43,52 +41,27 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
   <!-- Scanner Audio & Visual Notification Toast -->
-  <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
-    <span class="text-xl">📟</span>
+  <div id="scanNotificationToast" class="fixed top-4 right-4 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400">
+    <span class="text-2xl">📟</span>
     <div>
-      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100" id="scanToastTitle">Barcode Scanned</div>
+      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-100" id="scanToastTitle">Honeywell Scan</div>
       <div class="text-xs font-bold" id="scanToastMessage">Item Added</div>
     </div>
   </div>
 
-  <!-- Mobile Camera Scanner Modal Overlay -->
-  <div id="cameraScannerModal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-3 hidden backdrop-blur-md">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 relative shadow-2xl">
+  <!-- Quick Barcode Assignment Modal (Auto-pops when an unmapped barcode is scanned) -->
+  <div id="quickAssignModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider" id="cameraModalTitle">Mobile Barcode Scanner</h3>
+        <div>
+          <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">⚡ New Barcode Scanned</span>
+          <h3 class="text-sm font-bold text-white mono mt-0.5">Code: <span id="assignBarcodeDisplay" class="text-emerald-400 font-extrabold text-base"></span></h3>
         </div>
-        <button type="button" onclick="closeCameraScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+        <button type="button" onclick="closeQuickAssignModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
-      
-      <!-- Auto-Close Mode Selector -->
-      <div id="autoCloseControls" class="bg-slate-950/80 border border-slate-800 p-2 rounded-xl flex items-center justify-between text-[11px]">
-        <span class="text-slate-400 font-medium">Auto-Return after:</span>
-        <div class="flex gap-1" id="scanLimitButtonGroup">
-          <button type="button" onclick="setScanLimit(1)" id="limitBtn_1" class="px-2 py-0.5 rounded font-bold transition bg-emerald-600 text-white">1 Scan</button>
-          <button type="button" onclick="setScanLimit(2)" id="limitBtn_2" class="px-2 py-0.5 rounded font-bold transition bg-slate-800 text-slate-300 hover:text-white">2 Scans</button>
-          <button type="button" onclick="setScanLimit(3)" id="limitBtn_3" class="px-2 py-0.5 rounded font-bold transition bg-slate-800 text-slate-300 hover:text-white">3 Scans</button>
-          <button type="button" onclick="setScanLimit(0)" id="limitBtn_0" class="px-2 py-0.5 rounded font-bold transition bg-slate-800 text-slate-300 hover:text-white">Continuous</button>
-        </div>
-      </div>
-
-      <!-- Live Video Viewport -->
-      <div class="w-full bg-black rounded-xl overflow-hidden min-h-[260px] flex items-center justify-center border border-slate-800 relative" id="cameraReader">
-        <!-- Target reticle guide -->
-        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <div class="w-64 h-36 border-2 border-emerald-400/70 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)]"></div>
-        </div>
-      </div>
-      
-      <div class="flex justify-between items-center text-[11px] text-slate-400 pt-1">
-        <span id="cameraHelpText">Point camera at packet barcode.</span>
-        <span class="mono text-emerald-400 font-bold" id="sessionScanCountLabel">Scanned: 0</span>
-      </div>
-      
-      <button type="button" onclick="closeCameraScanner()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl uppercase tracking-wider transition">
-        Return to POS Screen
-      </button>
+      <p class="text-xs text-slate-300">Tap which product this barcode belongs to. It will be saved permanently to your cloud master and added to the cart:</p>
+      <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1" id="quickAssignProductList"></div>
+      <button type="button" onclick="closeQuickAssignModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold rounded-xl uppercase">Cancel</button>
     </div>
   </div>
 
@@ -102,11 +75,11 @@
           <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
             ☁️ Cloud Live Sync
           </span>
-          <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span> Auto-Scan Engine Active
+          <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Honeywell USB Ready
           </span>
         </div>
-        <p class="text-xs text-slate-400 mt-1">POS Billing, Camera Barcode Scanner, In-Store Retail &amp; Kirana Distribution</p>
+        <p class="text-xs text-slate-400 mt-1">POS Billing, Honeywell Barcode Integration, In-Store Retail &amp; Kirana Distribution</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
@@ -177,24 +150,18 @@
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
             <h2 class="text-lg font-bold text-white">⚡ POS Counter Billing</h2>
-            <p class="text-xs text-slate-400">Scan barcodes with camera (auto-returns) or tap items below</p>
+            <p class="text-xs text-slate-400">Swipe item across Honeywell scanner glass or tap buttons below</p>
           </div>
-          <div class="flex items-center gap-2">
-            <!-- Mobile Camera Scanner Button -->
-            <button type="button" onclick="openCameraScanner('pos')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-emerald-950 transition">
-              <span>📷</span> Phone Scan
-            </button>
-            <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
-              <span class="text-xs">🔍</span>
-              <input type="text" id="posBarcodeInput" placeholder="Code / Name..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-28" oninput="handlePosSearch(this.value)">
-            </div>
+          <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
+            <span class="text-xs">🔍</span>
+            <input type="text" id="posBarcodeInput" placeholder="Manual Code / Name..." class="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36" oninput="handlePosSearch(this.value)">
           </div>
         </div>
 
         <!-- Category Filters -->
         <div class="flex gap-2 overflow-x-auto pb-1" id="posCategoryTabs">
           <button type="button" onclick="filterPosCategory('all')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition">All</button>
-          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fast Picks / No Barcode</button>
+          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fast Picks / Fresh</button>
           <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
           <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd</button>
           <button type="button" onclick="filterPosCategory('bucket')" class="px-3 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Buckets</button>
@@ -202,9 +169,7 @@
         </div>
 
         <!-- 1-Tap Item Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[480px] overflow-y-auto pr-1" id="posProductGrid">
-          <!-- Injected dynamically -->
-        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[480px] overflow-y-auto pr-1" id="posProductGrid"></div>
       </div>
 
       <!-- Right: Active Bill & Cart Summary (5 Cols) -->
@@ -226,7 +191,7 @@
 
           <!-- Cart Line Items -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1" id="cartItemsContainer">
-            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product or tap on the left to add.</div>
+            <div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>
           </div>
         </div>
 
@@ -439,7 +404,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
             <h2 class="text-lg font-bold text-white">Master Price &amp; Barcode Configuration</h2>
-            <p class="text-xs text-slate-400">Scan actual pouch barcodes via camera, or assign shortcodes for unbarcoded items (e.g. Fruit Salad).</p>
+            <p class="text-xs text-slate-400">Click any barcode box and scan with Honeywell scanner to auto-fill, or click ⚡ to auto-assign codes.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="printCounterBarcodeSheet()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow">
@@ -530,7 +495,7 @@
     <div id="barcodeSheetGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;"></div>
   </div>
 
-  <!-- Firebase Live Realtime Cloud Script & Barcode Interceptor -->
+  <!-- Firebase Live Realtime Cloud Script & Honeywell Barcode Engine -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -589,10 +554,10 @@
       badammilk: { name: "Nut Badam Milk Bottle", barcode: "BM103", section: "nobarcode", unit: "BTL", agentPrice: 28.00, mrp: 35.00, shopRate: 30.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v6";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v6";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v6";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v6";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v7";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v7";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v7";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v7";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -603,15 +568,7 @@
     let currentPosCategory = 'all';
     let demandChart = null;
 
-    // Camera scanner state & auto-return limit
-    let html5QrScannerInstance = null;
-    let cameraMode = 'pos';
-    let cameraAssignTargetKey = null;
-    let lastScannedCode = "";
-    let lastScanTime = 0;
-    let scanLimitTarget = parseInt(localStorage.getItem('annapurna_scan_limit') || "1", 10);
-    let sessionScannedCount = 0;
-    let autoCloseTimer = null;
+    let pendingUnmappedBarcode = "";
 
     function getLocalDateString(d = new Date()) {
       const year = d.getFullYear();
@@ -632,12 +589,9 @@
     function playBigBeep(success = true) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
         if (success) {
-          // Supermarket scanner chime: crisp 1900Hz -> 2400Hz loud burst
           const osc = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
           
@@ -645,7 +599,6 @@
           osc.frequency.setValueAtTime(1900, audioCtx.currentTime);
           osc.frequency.exponentialRampToValueAtTime(2400, audioCtx.currentTime + 0.08);
 
-          // Loud retail volume (85% peak output)
           gainNode.gain.setValueAtTime(0.85, audioCtx.currentTime);
           gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.16);
 
@@ -653,15 +606,11 @@
           gainNode.connect(audioCtx.destination);
           osc.start();
           osc.stop(audioCtx.currentTime + 0.17);
-
-          // Haptic mobile vibration
-          if (navigator.vibrate) navigator.vibrate(90);
         } else {
-          // Low error buzzer
           const osc = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(210, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
 
           gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
           gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
@@ -670,8 +619,6 @@
           gainNode.connect(audioCtx.destination);
           osc.start();
           osc.stop(audioCtx.currentTime + 0.31);
-
-          if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
         }
       } catch(e) {}
     }
@@ -682,166 +629,121 @@
       document.getElementById("scanToastMessage").innerText = msg;
 
       toast.className = isSuccess 
-        ? "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400"
-        : "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-rose-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-rose-400";
+        ? "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400"
+        : "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none bg-rose-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-rose-400";
 
       setTimeout(() => {
-        toast.className = "fixed top-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
+        toast.className = "fixed top-4 right-4 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400";
       }, 1900);
     }
 
     // =========================================================================
-    // 📱 MOBILE CAMERA SCANNER & AUTO-RETURN CONTROLLER
+    // 🎧 HONEYWELL USB SCANNER GLOBAL KEYSTROKE BUFFER & PARSER
     // =========================================================================
-    window.setScanLimit = function(limit) {
-      scanLimitTarget = limit;
-      localStorage.setItem('annapurna_scan_limit', limit);
-      updateScanLimitButtons();
-    };
+    let globalBarcodeBuffer = "";
+    let lastKeyStrokeTime = Date.now();
 
-    function updateScanLimitButtons() {
-      [0, 1, 2, 3].forEach(val => {
-        const btn = document.getElementById(`limitBtn_${val}`);
-        if (btn) {
-          btn.className = scanLimitTarget === val
-            ? "px-2 py-0.5 rounded font-bold transition bg-emerald-600 text-white"
-            : "px-2 py-0.5 rounded font-bold transition bg-slate-800 text-slate-300 hover:text-white";
+    window.addEventListener("keydown", (e) => {
+      const activeElement = document.activeElement;
+      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
+
+      const now = Date.now();
+      const timeDiff = now - lastKeyStrokeTime;
+      lastKeyStrokeTime = now;
+
+      // Reset buffer if delay indicates human paused typing (>120ms)
+      if (timeDiff > 120) globalBarcodeBuffer = "";
+
+      if (e.key === "Enter") {
+        if (globalBarcodeBuffer.length >= 3) {
+          e.preventDefault();
+          const scannedCode = globalBarcodeBuffer.trim();
+          globalBarcodeBuffer = "";
+
+          // If focused inside a master table barcode box, let it fill & save
+          if (activeElement && activeElement.id && activeElement.id.startsWith("masterBarcode_")) {
+            activeElement.value = scannedCode;
+            const itemKey = activeElement.id.replace("masterBarcode_", "");
+            saveMasterRate(itemKey);
+            return;
+          }
+
+          processHoneywellBarcode(scannedCode);
         }
-      });
-    }
-
-    window.openCameraScanner = async function(mode = 'pos', targetKey = null) {
-      cameraMode = mode;
-      cameraAssignTargetKey = targetKey;
-      sessionScannedCount = 0;
-      if (autoCloseTimer) clearTimeout(autoCloseTimer);
-
-      updateScanLimitButtons();
-      document.getElementById("sessionScanCountLabel").innerText = `Scanned: 0`;
-
-      const modal = document.getElementById("cameraScannerModal");
-      const title = document.getElementById("cameraModalTitle");
-      const help = document.getElementById("cameraHelpText");
-      const limitControls = document.getElementById("autoCloseControls");
-
-      if (mode === 'assign' && targetKey) {
-        title.innerText = `Scan Barcode for ${masterItems[targetKey]?.name || targetKey}`;
-        help.innerText = "Point camera at packet barcode. Will auto-save and close instantly.";
-        limitControls.classList.add("hidden");
-      } else {
-        title.innerText = "Mobile Barcode Scanner";
-        help.innerText = "Point camera at barcode. Will beep and return to POS automatically.";
-        limitControls.classList.remove("hidden");
+      } else if (e.key.length === 1) {
+        globalBarcodeBuffer += e.key;
       }
+    });
 
-      modal.classList.remove("hidden");
+    function processHoneywellBarcode(rawCode) {
+      const cleanCode = rawCode.trim().toLowerCase();
 
-      if (!html5QrScannerInstance) {
-        html5QrScannerInstance = new Html5Qrcode("cameraReader");
-      }
-
-      const scanConfig = {
-        fps: 18,
-        qrbox: { width: 260, height: 160 },
-        aspectRatio: 1.0,
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E,
-          Html5QrcodeSupportedFormats.QR_CODE
-        ]
-      };
-
-      try {
-        await html5QrScannerInstance.start(
-          { facingMode: "environment" },
-          scanConfig,
-          (decodedText) => {
-            const now = Date.now();
-            if (decodedText === lastScannedCode && (now - lastScanTime) < 1600) return;
-            lastScannedCode = decodedText;
-            lastScanTime = now;
-
-            if (cameraMode === 'assign' && cameraAssignTargetKey) {
-              handleBarcodeAssignment(cameraAssignTargetKey, decodedText);
-            } else {
-              handleCameraPosScan(decodedText);
-            }
-          },
-          () => {}
-        );
-      } catch (err) {
-        alert("Camera permission denied. Please enable camera in your mobile browser settings.");
-        closeCameraScanner();
-      }
-    };
-
-    window.closeCameraScanner = async function() {
-      if (autoCloseTimer) clearTimeout(autoCloseTimer);
-      if (html5QrScannerInstance && html5QrScannerInstance.isScanning) {
-        try {
-          await html5QrScannerInstance.stop();
-        } catch (e) {}
-      }
-      document.getElementById("cameraScannerModal").classList.add("hidden");
-    };
-
-    // POS scan handler with Auto-Return
-    function handleCameraPosScan(rawBarcode) {
-      const barcodeClean = rawBarcode.trim().toLowerCase();
-
+      // Find matching item by registered barcode or key
       let matchedKey = Object.keys(masterItems).find(k => {
         const it = masterItems[k];
-        return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
+        return (it.barcode && it.barcode.trim().toLowerCase() === cleanCode) || k.toLowerCase() === cleanCode;
       });
 
       if (matchedKey) {
-        sessionScannedCount++;
-        document.getElementById("sessionScanCountLabel").innerText = `Scanned: ${sessionScannedCount}`;
         playBigBeep(true);
         addToCart(matchedKey);
-
         showScanToast("Added to Cart", `${masterItems[matchedKey].name} — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
-
-        // Check auto-close threshold: if scanLimit reached, return to home POS screen automatically!
-        if (scanLimitTarget > 0 && sessionScannedCount >= scanLimitTarget) {
-          setTimeout(() => {
-            closeCameraScanner();
-            switchView('pos');
-          }, 450);
-          return;
-        }
-
-        // Reset inactivity auto-return timer (auto-returns to POS screen after 2.5s if no more scans)
-        if (autoCloseTimer) clearTimeout(autoCloseTimer);
-        autoCloseTimer = setTimeout(() => {
-          closeCameraScanner();
-          switchView('pos');
-        }, 2500);
-
+        switchView('pos');
       } else {
+        // Unmapped barcode: trigger 1-tap quick assignment modal!
         playBigBeep(false);
-        showScanToast("Barcode Not Found", `Code [${rawBarcode}] not registered. Map in Price Master!`, false);
+        openQuickAssignModal(rawCode);
       }
     }
 
-    window.scanToAssignMasterBarcode = function(itemKey) {
-      openCameraScanner('assign', itemKey);
+    // =========================================================================
+    // ⚡ 1-TAP INSTANT BARCODE MAPPING MODAL
+    // =========================================================================
+    function openQuickAssignModal(scannedCode) {
+      pendingUnmappedBarcode = scannedCode;
+      document.getElementById("assignBarcodeDisplay").innerText = scannedCode;
+      const container = document.getElementById("quickAssignProductList");
+      container.innerHTML = "";
+
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "p-2.5 rounded-xl bg-slate-800 hover:bg-emerald-950/70 border border-slate-700 hover:border-emerald-500 text-left transition active:scale-95";
+        btn.onclick = () => confirmAssignBarcode(k);
+        btn.innerHTML = `
+          <div class="text-xs font-bold text-white leading-tight">${it.name}</div>
+          <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+            <span>MRP: ₹${Number(it.mrp).toFixed(2)}</span>
+            <span class="mono text-emerald-400 font-bold">${it.barcode ? 'Change Code' : 'Assign Code'}</span>
+          </div>
+        `;
+        container.appendChild(btn);
+      });
+
+      document.getElementById("quickAssignModal").classList.remove("hidden");
+    }
+
+    window.closeQuickAssignModal = function() {
+      document.getElementById("quickAssignModal").classList.add("hidden");
+      pendingUnmappedBarcode = "";
     };
 
-    async function handleBarcodeAssignment(itemKey, barcode) {
+    async function confirmAssignBarcode(itemKey) {
+      if (!pendingUnmappedBarcode || !masterItems[itemKey]) return;
+      const codeToLink = pendingUnmappedBarcode;
+
+      masterItems[itemKey].barcode = codeToLink;
+      await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+
       playBigBeep(true);
-      if (masterItems[itemKey]) {
-        masterItems[itemKey].barcode = barcode.trim();
-        await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
-        renderMasterTable();
-        renderPosGrid();
-        showScanToast("Barcode Linked", `[${barcode}] saved for ${masterItems[itemKey].name}!`, true);
-        setTimeout(() => closeCameraScanner(), 400);
-      }
+      addToCart(itemKey);
+      showScanToast("Barcode Linked & Added", `${masterItems[itemKey].name} linked to [${codeToLink}]!`, true);
+
+      closeQuickAssignModal();
+      renderMasterTable();
+      renderPosGrid();
+      switchView('pos');
     }
 
     window.autoGenerateShortcode = async function(itemKey) {
@@ -855,50 +757,6 @@
       renderPosGrid();
       alert(`Assigned shortcode "${generatedCode}" to ${masterItems[itemKey].name}!`);
     };
-
-    // Global desktop presentation scanner listener (<100ms key bursts)
-    let globalBarcodeBuffer = "";
-    let lastKeyStrokeTime = Date.now();
-
-    window.addEventListener("keydown", (e) => {
-      const activeElement = document.activeElement;
-      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
-
-      const now = Date.now();
-      const timeDiff = now - lastKeyStrokeTime;
-      lastKeyStrokeTime = now;
-
-      if (timeDiff > 120) globalBarcodeBuffer = "";
-
-      if (e.key === "Enter") {
-        if (globalBarcodeBuffer.length >= 2) {
-          e.preventDefault();
-          processScannedBarcode(globalBarcodeBuffer.trim());
-          globalBarcodeBuffer = "";
-        }
-      } else if (e.key.length === 1) {
-        globalBarcodeBuffer += e.key;
-      }
-    });
-
-    function processScannedBarcode(rawBarcode) {
-      const barcodeClean = rawBarcode.trim().toLowerCase();
-
-      let matchedKey = Object.keys(masterItems).find(k => {
-        const it = masterItems[k];
-        return (it.barcode && it.barcode.trim().toLowerCase() === barcodeClean) || k.toLowerCase() === barcodeClean;
-      });
-
-      if (matchedKey) {
-        playBigBeep(true);
-        addToCart(matchedKey);
-        showScanToast("Item Added", `${masterItems[matchedKey].name} — ₹${Number(masterItems[matchedKey].mrp).toFixed(2)}`, true);
-        switchView('pos');
-      } else {
-        playBigBeep(false);
-        showScanToast("Unknown Item", `Code [${rawBarcode}]. Map in Price Master!`, false);
-      }
-    }
 
     window.printCounterBarcodeSheet = function() {
       const grid = document.getElementById("barcodeSheetGrid");
@@ -1127,7 +985,7 @@
       document.getElementById("cartItemCountLabel").innerText = `${keys.length} product(s)`;
 
       if (keys.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product or tap on the left to add.</div>`;
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Cart is empty. Scan any product with Honeywell scanner to start billing.</div>`;
         document.getElementById("posBillSubtotal").innerText = "₹0.00";
         document.getElementById("posBillProfit").innerText = "₹0.00";
         document.getElementById("posBillTotal").innerText = "₹0.00";
@@ -1342,7 +1200,7 @@
             <div>${item.name}</div>
             <div class="flex items-center gap-2">
               <span class="text-[10px] text-slate-500 uppercase tracking-wider">${item.unit}</span>
-              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${item.barcode}</span>` : ''}
+              ${item.barcode ? `<span class="text-[9px] text-sky-400 font-mono">🏷️${it.barcode || item.barcode}</span>` : ''}
             </div>
           </td>
           <td class="p-3 text-center mono text-[11px]">
@@ -1865,11 +1723,8 @@
           <td class="p-3 text-center">
             <div class="flex items-center justify-center gap-1">
               <input type="text" id="masterBarcode_${k}" value="${it.barcode || ''}" placeholder="Scan/Type" 
-                class="w-28 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500 text-xs">
-              <button type="button" onclick="scanToAssignMasterBarcode('${k}')" title="Scan with Phone Camera" class="px-2 py-1 bg-sky-950 text-sky-300 border border-sky-800 hover:bg-sky-900 rounded text-xs">
-                📷
-              </button>
-              <button type="button" onclick="autoGenerateShortcode('${k}')" title="Auto-Assign Shortcode (No barcode)" class="px-2 py-1 bg-amber-950 text-amber-300 border border-amber-800 hover:bg-amber-900 rounded text-xs font-bold">
+                class="w-32 bg-slate-800 border border-slate-700 text-center text-sky-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-sky-500 text-xs">
+              <button type="button" onclick="autoGenerateShortcode('${k}')" title="Auto-Assign Shortcode" class="px-2 py-1 bg-amber-950 text-amber-300 border border-amber-800 hover:bg-amber-900 rounded text-xs font-bold">
                 ⚡
               </button>
             </div>
