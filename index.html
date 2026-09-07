@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Product Name *</label>
-            <input type="text" id="formProductName" required placeholder="e.g. FCM Gold Plus 500ml, Curd 450g Sachet" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductName" required placeholder="e.g. French Fries, Veg Momos, Water Bottle" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -129,13 +129,14 @@
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Category / Section *</label>
             <select id="formProductSection" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-              <option value="milk">Milk Varieties (TM, FCM, Cow Milk)</option>
+              <option value="fastfood">🍟 Fast Food &amp; Cafe (Fries, Momos, Fruit Salad)</option>
+              <option value="beverages">🥤 Cool Drinks &amp; Beverages (Water, ThumsUp)</option>
+              <option value="milk">Milk Varieties (TM, FCM)</option>
               <option value="curd">Curd Packets &amp; Buckets</option>
-              <option value="ghee">Ghee (500ml, 1L, Jars, Tins)</option>
+              <option value="ghee">Ghee (Jars, Tins)</option>
               <option value="paneer">Paneer &amp; Butter</option>
-              <option value="drinks">Lassi &amp; Buttermilk / Drinks</option>
               <option value="sweets">Sweets &amp; Bi-Products</option>
-              <option value="snacks">Cookies, Chikkis &amp; Snacks</option>
+              <option value="snacks">Cookies &amp; Snacks</option>
               <option value="spices">Spices &amp; Masalas</option>
               <option value="general">Other Items</option>
             </select>
@@ -143,11 +144,11 @@
 
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Unit</label>
-            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, BUCKET, JAR, CUP" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductUnit" value="PLATE" placeholder="PLATE, BOTTLE, CUP, PKT, BOWL" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Agent Buy Cost (₹) *</label>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Agent Buy Cost / Prep Cost (₹) *</label>
             <input type="number" step="0.05" id="formProductAgentCost" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-emerald-400 mono font-bold focus:outline-none focus:border-emerald-500">
           </div>
 
@@ -157,7 +158,7 @@
           </div>
 
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana Wholesale Rate (₹)</label>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Wholesale Rate (₹)</label>
             <input type="number" step="0.05" id="formProductShopRate" placeholder="0.00" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-300 mono font-bold focus:outline-none focus:border-emerald-500">
           </div>
 
@@ -181,7 +182,7 @@
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
+          <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Cafe</h1>
           <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
             ☁️ Cloud Live Sync
           </span>
@@ -199,7 +200,7 @@
             </button>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mt-1">POS Billing, Kirana Wholesale, Home Consumption, Cashflow &amp; Complete Sangam Rate Chart Catalog</p>
+        <p class="text-xs text-slate-400 mt-1">POS Billing, Fast Food Cafe, Drinks, Kirana Wholesale &amp; Complete Sangam Rate Chart Catalog</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
@@ -270,26 +271,11 @@
     <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
     <!-- ============================================================= -->
     <div id="viewKirana" class="space-y-6">
-      <div class="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-3">
-        <div class="flex justify-between items-center flex-wrap gap-2">
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            ⚡ Quick Bulk Kirana Text Dispatch (Type or Paste)
-          </span>
-          <button type="button" onclick="applyKiranaQuickText()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow">
-            Parse &amp; Add Shop Dispatch
-          </button>
-        </div>
-        <p class="text-[11px] text-slate-300">
-          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>FCM - 4</code>, <code>Small Curd - 10</code>, <code>5kg Bucket - 2</code>, <code>Ghee 500ml - 3</code>).
-        </p>
-        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;FCM - 4&#10;Small Curd - 10&#10;5kg Bucket - 2&#10;Ghee 500ml - 1&#10;Buttermilk - 10&#10;Lassi - 5&#10;Paneer - 2"></textarea>
-      </div>
-
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 flex-wrap gap-2">
           <div>
             <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Order layout: Milk (TM, FCM, Small Milk), Curd (Small Curd, Big Curd, 5kg/10kg Bucket), Ghee (500ml, 1L), Buttermilk, Lassi, Paneer.</p>
+            <p class="text-xs text-slate-400">Order layout: Milk, Curd, Ghee, Paneer, Fast Food items, and Beverages.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openNewProductModal()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
@@ -390,11 +376,12 @@
 
         <div class="flex gap-2 overflow-x-auto pb-1" id="posCategoryTabs">
           <button type="button" onclick="filterPosCategory('all')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition">All</button>
-          <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
-          <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd &amp; Buckets</button>
+          <button type="button" onclick="filterPosCategory('fastfood')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">🍟 Fast Food &amp; Cafe</button>
+          <button type="button" onclick="filterPosCategory('beverages')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">🥤 Cool Drinks</button>
+          <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-blue-950 text-blue-300 border border-blue-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
+          <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-orange-950 text-orange-300 border border-orange-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd &amp; Buckets</button>
           <button type="button" onclick="filterPosCategory('ghee')" class="px-3 py-1 bg-yellow-950 text-yellow-300 border border-yellow-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Ghee</button>
           <button type="button" onclick="filterPosCategory('paneer')" class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Paneer &amp; Butter</button>
-          <button type="button" onclick="filterPosCategory('drinks')" class="px-3 py-1 bg-purple-950 text-purple-300 border border-purple-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Lassi &amp; Drinks</button>
           <button type="button" onclick="filterPosCategory('sweets')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Sweets &amp; Snacks</button>
         </div>
 
@@ -520,21 +507,6 @@
 
     <!-- VIEW 4: IN-STORE STOCK RECONCILIATION -->
     <div id="viewRetail" class="space-y-6 hidden">
-      <div class="bg-sky-950/40 p-4 rounded-2xl border border-sky-800/60 shadow-lg space-y-2">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
-            🌙 Quick Leftover Stock Entry (Count Fridge Packets at Night)
-          </span>
-          <button type="button" onclick="applyQuickLeftovers()" class="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold uppercase">
-            Auto-Calculate In-Store Customers
-          </button>
-        </div>
-        <p class="text-[11px] text-slate-300">
-          Type unsold packets remaining in fridge. Customer sales at MRP will calculate automatically!
-        </p>
-        <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 5"></textarea>
-      </div>
-
       <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
@@ -802,7 +774,7 @@
   <!-- Thermal Receipt Container -->
   <div id="printableReceipt" class="hidden">
     <div style="text-align:center; margin-bottom:6px;">
-      <h3 style="font-weight:700; font-size:13px;">ANNAPURNA DAIRY &amp; FOODS</h3>
+      <h3 style="font-weight:700; font-size:13px;">ANNAPURNA DAIRY &amp; CAFE</h3>
       <p style="font-size:10px;">Moosapet, Hyderabad</p>
       <p style="font-size:9px;" id="receiptDateTime">--</p>
       <p style="border-top:1px dashed #000; margin:4px 0;"></p>
@@ -884,216 +856,39 @@
       }
     }
 
-    // Fully populated catalog containing all 200 items from Sangam Rate Chart
     const DEFAULT_MASTER_ITEMS = {
+      cafe_fries: { name: "French Fries", barcode: "FF01", section: "fastfood", unit: "PLATE", agentPrice: 35.0, mrp: 70.0, shopRate: 70.0 },
+      cafe_vegmomos: { name: "Veg Momos", barcode: "VM01", section: "fastfood", unit: "PLATE", agentPrice: 40.0, mrp: 80.0, shopRate: 80.0 },
+      cafe_chickmomos: { name: "Chicken Momos", barcode: "CM01", section: "fastfood", unit: "PLATE", agentPrice: 55.0, mrp: 110.0, shopRate: 110.0 },
+      cafe_nuggets: { name: "Chicken Nuggets", barcode: "CN01", section: "fastfood", unit: "PLATE", agentPrice: 50.0, mrp: 100.0, shopRate: 100.0 },
+      cafe_sweetcorn: { name: "Sweet Corn", barcode: "SC01", section: "fastfood", unit: "CUP", agentPrice: 25.0, mrp: 50.0, shopRate: 50.0 },
+      cafe_fruitsalad: { name: "Fruit Salad", barcode: "FS01", section: "fastfood", unit: "BOWL", agentPrice: 30.0, mrp: 60.0, shopRate: 60.0 },
+      cafe_fruitsaladcust: { name: "Fruit Salad with Custard", barcode: "FSC1", section: "fastfood", unit: "BOWL", agentPrice: 40.0, mrp: 80.0, shopRate: 80.0 },
+      cafe_sprouts: { name: "Sprouts", barcode: "SP01", section: "fastfood", unit: "BOWL", agentPrice: 20.0, mrp: 40.0, shopRate: 40.0 },
+
+      bev_water: { name: "Water Bottle (1L)", barcode: "WAT1", section: "beverages", unit: "BOTTLE", agentPrice: 12.0, mrp: 20.0, shopRate: 18.0 },
+      bev_thumsup: { name: "Thums Up (500ml)", barcode: "THU1", section: "beverages", unit: "BOTTLE", agentPrice: 22.0, mrp: 40.0, shopRate: 35.0 },
+
       item_0_fcmgoldplu: { name: "FCM GOLD PLUS 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 75.4, mrp: 82.0, shopRate: 76.26 },
       item_1_fullcreami: { name: "FULLCREAMILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 73.6, mrp: 80.0, shopRate: 74.4 },
       item_2_stm500mlsa: { name: "STM 500 ML(SANGAM PREMIUM)", barcode: "", section: "milk", unit: "PKT", agentPrice: 61.75, mrp: 68.0, shopRate: 63.24 },
       item_3_teaspecial: { name: "TEA SPECIAL 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 71.6, mrp: 78.0, shopRate: 72.54 },
       item_4_tonnedmilk: { name: "TONNED MILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 57.85, mrp: 64.0, shopRate: 59.52 },
-      item_5_tonnedmilk: { name: "TONNEDMILK 170ML (5 pack)", barcode: "", section: "milk", unit: "PKT", agentPrice: 41.75, mrp: 50.0, shopRate: 46.5 },
-      item_6_dtm500ml: { name: "DTM500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 51.35, mrp: 56.0, shopRate: 52.08 },
       item_7_curd120gms: { name: "CURD 120 GMS SATCHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 7.6, mrp: 10.0, shopRate: 9.3 },
-      item_8_curd200gpa: { name: "CURD 200 G PACK", barcode: "", section: "curd", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.95 },
       item_9_curd450gmss: { name: "CURD 450GMS SACHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 61.0, mrp: 84.0, shopRate: 78.12 },
-      item_10_curdsachee: { name: "CURD SACHEET 900 GMS", barcode: "", section: "curd", unit: "PKT", agentPrice: 55.5, mrp: 70.0, shopRate: 65.1 },
-      item_11_stmcurdcu: { name: "S.T.M. CURD CUP100G", barcode: "", section: "curd", unit: "CUP", agentPrice: 8.0, mrp: 10.0, shopRate: 9.3 },
-      item_12_curd200gcu: { name: "CURD 200 G CUP", barcode: "", section: "curd", unit: "CUP", agentPrice: 17.5, mrp: 20.0, shopRate: 18.6 },
-      item_13_stmcurd50: { name: "S.T.M CURD 500G CUPS", barcode: "", section: "curd", unit: "CUP", agentPrice: 46.0, mrp: 55.0, shopRate: 51.15 },
-      item_14_stmcurd40: { name: "S.T.M CURD 400G CUPS", barcode: "", section: "curd", unit: "CUP", agentPrice: 34.0, mrp: 38.0, shopRate: 35.34 },
-      item_15_stmcurd1k: { name: "STM CURD 1 KG DISPO", barcode: "", section: "curd", unit: "KG", agentPrice: 88.0, mrp: 115.0, shopRate: 106.95 },
-      item_16_stmcurd10l: { name: "S.T.M.CURD 10 LIT (DISPO BUCKET)", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 710.0, mrp: 780.0, shopRate: 725.4 },
       item_17_stmcurd5k: { name: "S.T.M.CURD 5 KG (DISPO BUCKET)", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 360.0, mrp: 400.0, shopRate: 372.0 },
-      item_18_tmcurd10kg: { name: "TM CURD 10 KG DISPO", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 660.0, mrp: 750.0, shopRate: 697.5 },
-      item_19_tmcurddisp: { name: "TM CURD DISPO 5 KG", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 340.0, mrp: 390.0, shopRate: 362.7 },
-      item_20_buttermilk: { name: "BUTTERMILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 7.6, mrp: 9.0, shopRate: 8.37 },
-      item_21_jeerabutte: { name: "JEERA BUTTER MILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 10.0, mrp: 15.0, shopRate: 13.95 },
-      item_22_lassisache: { name: "LASSI SACHET 180 GMS", barcode: "", section: "drinks", unit: "PKT", agentPrice: 10.4, mrp: 12.0, shopRate: 11.16 },
-      item_23_lassiwhite: { name: "LASSI (WHITE)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
-      item_24_sweetlassi: { name: "SWEETLASSI(MANGO)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
-      item_25_sweetlassi: { name: "SWEETLASSI(PINEAPPLE)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
-      item_26_sabjalassi: { name: "SABJA LASSI", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.75, mrp: 22.0, shopRate: 20.46 },
-      item_27_sweetlassi: { name: "SWEETLASSI(STRAWBERRY)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
-      item_28_panner100g: { name: "PANNER 100 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 42.5, mrp: 49.0, shopRate: 45.57 },
+      item_20_buttermilk: { name: "BUTTERMILK", barcode: "", section: "beverages", unit: "PKT", agentPrice: 7.6, mrp: 9.0, shopRate: 8.37 },
+      item_23_lassiwhite: { name: "LASSI (WHITE)", barcode: "", section: "beverages", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
       item_29_panneer200: { name: "PANNEER 200 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 70.0, mrp: 85.0, shopRate: 79.05 },
-      item_30_panneer500: { name: "PANNEER 500 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 168.0, mrp: 190.0, shopRate: 176.7 },
-      item_31_panneer1kg: { name: "PANNEER 1 KG", barcode: "", section: "paneer", unit: "KG", agentPrice: 337.0, mrp: 380.0, shopRate: 353.4 },
-      item_32_junnu100gm: { name: "JUNNU 100GMS CUP", barcode: "", section: "sweets", unit: "CUP", agentPrice: 17.25, mrp: 22.0, shopRate: 20.46 },
-      item_33_junnu50gms: { name: "JUNNU 50GMS CUP", barcode: "", section: "sweets", unit: "CUP", agentPrice: 9.0, mrp: 12.0, shopRate: 11.16 },
-      item_34_cream1000m: { name: "CREAM 1000 ML PACK", barcode: "", section: "sweets", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 186.0 },
-      item_35_dtcmtetric: { name: "DTCM TETRA 180 ML (APS)", barcode: "", section: "milk", unit: "PKT", agentPrice: 11.65, mrp: 13.0, shopRate: 12.09 },
-      item_36_dtmtetra18: { name: "DTM (TETRA) 180 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 11.65, mrp: 13.0, shopRate: 12.09 },
-      item_37_tetratm31l: { name: "TETRA T.M.(3%) 1 LIT PACK(12)", barcode: "", section: "milk", unit: "PKT", agentPrice: 58.5, mrp: 64.0, shopRate: 59.52 },
-      item_38_elifebuffe: { name: "E LIFE BUFFELOW (TM 500ML)(CARTON)", barcode: "", section: "milk", unit: "PKT", agentPrice: 26.4, mrp: 29.0, shopRate: 26.97 },
-      item_39_sugarlessk: { name: "SUGARLESSKOVA", barcode: "", section: "sweets", unit: "KG", agentPrice: 380.0, mrp: 400.0, shopRate: 372.0 },
-      item_40_basundifam: { name: "BASUNDI FAMILY PACK 300GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 64.0, mrp: 75.0, shopRate: 69.75 },
-      item_41_basundhi50: { name: "BASUNDHI 50 GMS(HOMEPACK)12", barcode: "", section: "sweets", unit: "PKT", agentPrice: 132.0, mrp: 180.0, shopRate: 167.4 },
-      item_42_doodhpeda2: { name: "DOODH PEDA 20GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 7.9, mrp: 9.0, shopRate: 8.37 },
-      item_43_doodhpedama: { name: "DOODH PEDA(MAP) 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 81.0, mrp: 100.0, shopRate: 93.0 },
-      item_44_badambarfi: { name: "BADAM BARFI 200GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 114.0, mrp: 130.0, shopRate: 120.9 },
-      item_45_badammilkp: { name: "BADAM MILK POWDER 200GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 63.0, mrp: 80.0, shopRate: 74.4 },
-      item_46_gulabjam100: { name: "GULABJAM 100 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 18.5, mrp: 22.0, shopRate: 20.46 },
-      item_47_gulabjam400: { name: "GULABJAM 400 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 71.0, mrp: 80.0, shopRate: 74.4 },
-      item_48_gulabjamun: { name: "GULAB JAMUN 500 G", barcode: "", section: "sweets", unit: "PKT", agentPrice: 90.0, mrp: 100.0, shopRate: 93.0 },
-      item_49_jowrladdu20: { name: "JOWR LADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 93.0 },
-      item_50_kajubarfi2: { name: "KAJU BARFI 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 135.0, mrp: 150.0, shopRate: 139.5 },
-      item_51_kalakandmap: { name: "KALAKAND (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 81.0, mrp: 100.0, shopRate: 93.0 },
-      item_52_sugarlessk: { name: "SUGARLESS KALAKAND (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 106.0, mrp: 120.0, shopRate: 111.6 },
-      item_53_mysorepak20: { name: "MYSORE PAK 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 106.0, mrp: 120.0, shopRate: 111.6 },
-      item_54_ragiladdu20: { name: "RAGILADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 93.0 },
-      item_55_sunnunda: { name: "SUNNUNDA", barcode: "", section: "sweets", unit: "PKT", agentPrice: 112.0, mrp: 120.0, shopRate: 111.6 },
-      item_56_korraladu20: { name: "KORRALADU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 93.0 },
-      item_57_malailaddum: { name: "MALAI LADDU (MAP)150GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 79.0, mrp: 95.0, shopRate: 88.35 },
-      item_58_mixedmille: { name: "MIXED MILLET LADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 93.0 },
-      item_59_kajusticks1: { name: "KAJU STICKS 120 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 68.0, mrp: 75.0, shopRate: 69.75 },
-      item_60_kajusticks2: { name: "KAJU STICKS 200 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 100.0, mrp: 110.0, shopRate: 102.3 },
-      item_61_kajubitees2: { name: "KAJU BITEES 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 186.0 },
-      item_62_orangekaju: { name: "ORANGE KAJU BITES 200", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 186.0 },
-      item_63_chocolateka: { name: "CHOCOLATE KAJU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 186.0 },
-      item_64_badamraki20: { name: "BADAM RAKI 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 186.0 },
-      item_65_attaladdu20: { name: "ATTA LADDU 200 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 186.0 },
-      item_66_chanaladdu2: { name: "CHANA LADDU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 186.0 },
-      item_67_milkcakemap: { name: "MILK CAKE (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 90.0, mrp: 110.0, shopRate: 102.3 },
-      item_68_chocolatecu: { name: "CHOCOLATE CUP CAKE 20GMS", barcode: "", section: "snacks", unit: "CUP", agentPrice: 4.1, mrp: 5.0, shopRate: 4.65 },
-      item_69_venilacupca: { name: "VENILA CUP CAKE 20GMS", barcode: "", section: "snacks", unit: "CUP", agentPrice: 4.1, mrp: 5.0, shopRate: 4.65 },
-      item_70_venilabarca: { name: "VENILA BAR CAKE", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.9, mrp: 10.0, shopRate: 9.3 },
-      item_71_orangebarca: { name: "ORANGE BAR CAKE", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.9, mrp: 10.0, shopRate: 9.3 },
-      item_72_pineappleba: { name: "PINE APPLE BAR CK 32G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.6, mrp: 10.0, shopRate: 9.3 },
-      item_73_sfnutbadam2: { name: "SF NUT BADAM 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 25.0, mrp: 35.0, shopRate: 32.55 },
-      item_74_sfmchocolat: { name: "SFM CHOCOLATE MILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 25.0, mrp: 35.0, shopRate: 32.55 },
-      item_75_sfmilkdisp: { name: "S F MILK ( DISPO)", barcode: "", section: "drinks", unit: "CUP", agentPrice: 22.0, mrp: 30.0, shopRate: 27.9 },
-      item_76_sfmilkpp: { name: "S F MILK ( PP)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 20.0, mrp: 30.0, shopRate: 27.9 },
-      item_77_sfkesarpis: { name: "SF KESAR PISTA 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.9 },
-      item_78_sfpinapple2: { name: "SF PINAPPLE 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.9 },
-      item_79_sfpistachio: { name: "SF PISTA CHIO 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.9 },
-      item_80_sfstrawberry: { name: "SF STRAWBERRY 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.9 },
-      item_81_milkshapedo: { name: "MILKSHAKE DOUBLE CHOCOLATE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.9 },
-      item_82_butterscotc: { name: "BUTTER SCOTCH MILK SHAKE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.9 },
-      item_83_vanillamilk: { name: "VANILLA MILK SHAKE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.9 },
-      item_84_ptbutter50: { name: "P.T BUTTER 500GMS", barcode: "", section: "butter", unit: "PKT", agentPrice: 264.0, mrp: 280.0, shopRate: 260.4 },
-      item_85_ptbutter10: { name: "P.T BUTTER 100 GMS", barcode: "", section: "butter", unit: "PKT", agentPrice: 55.0, mrp: 65.0, shopRate: 60.45 },
-      item_86_cbutter500g: { name: "C BUTTER 500GMS", barcode: "", section: "butter", unit: "PKT", agentPrice: 266.0, mrp: 285.0, shopRate: 265.05 },
-      item_87_cbuter5kgca: { name: "C.BUTER 5 KG CARTONS", barcode: "", section: "butter", unit: "KG", agentPrice: 266.0, mrp: 285.0, shopRate: 265.05 },
-      item_88_cookingbutte: { name: "COOKING BUTTER 100 GMS", barcode: "", section: "butter", unit: "PKT", agentPrice: 61.0, mrp: 70.0, shopRate: 65.1 },
-      item_89_cowbutter20: { name: "COW/BUTTER 20KG", barcode: "", section: "butter", unit: "KG", agentPrice: 10700.0, mrp: 11000.0, shopRate: 10230.0 },
-      item_90_whitebutter2: { name: "WHITEBUTTER 20KG", barcode: "", section: "butter", unit: "KG", agentPrice: 10700.0, mrp: 11000.0, shopRate: 10230.0 },
-      item_91_peanutschik: { name: "PEANUTCHIKKI18 GMS BOTTLE", barcode: "", section: "snacks", unit: "BOTTLE", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_92_sesamchikki: { name: "SESAM CHIKKI18GMS BOTTLE", barcode: "", section: "snacks", unit: "BOTTLE", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_93_peanutschik: { name: "PEANUTCHIKKI90 GMS PKT", barcode: "", section: "snacks", unit: "PKT", agentPrice: 190.0, mrp: 250.0, shopRate: 232.5 },
-      item_94_sesamchkii9: { name: "SESAM CHKII90GMS PKT", barcode: "", section: "snacks", unit: "PKT", agentPrice: 190.0, mrp: 250.0, shopRate: 232.5 },
-      item_95_buffeloghee2: { name: "BUFFELOGHEE200ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 125.0, mrp: 145.0, shopRate: 134.85 },
-      item_96_buffeloghee5: { name: "BUFFELOGHEE 500ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.0, mrp: 345.0, shopRate: 320.85 },
-      item_97_buffeloghee1: { name: "BUFFELOGHEE 1000ML (4 PACK)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 610.0, mrp: 690.0, shopRate: 641.7 },
-      item_98_buffeloghee3: { name: "BUFFELOGHEE 15ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 8.3, mrp: 10.0, shopRate: 9.3 },
-      item_99_buffeloghee4: { name: "BUFFELOGHEE 30ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 16.6, mrp: 20.0, shopRate: 18.6 },
-      item_100_buffeloghee: { name: "BUFFELOGHEE 50ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 33.0, mrp: 40.0, shopRate: 37.2 },
-      item_101_bghee100mlj: { name: "B.GHEE 100ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 67.0, mrp: 78.0, shopRate: 72.54 },
-      item_102_bghee200mlj: { name: "B.GHEE 200ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 123.0, mrp: 145.0, shopRate: 134.85 },
-      item_103_bghee500mlj: { name: "B. GHEE 500ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 308.0, mrp: 350.0, shopRate: 325.5 },
-      item_104_bghee1000m: { name: "B.GHEE 1000ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 610.0, mrp: 700.0, shopRate: 651.0 },
-      item_105_bghee5ljar: { name: "B. GHEE 5L JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3050.0, mrp: 3350.0, shopRate: 3115.5 },
-      item_106_bghee200mld: { name: "BGHEE 200ML DINING", barcode: "", section: "ghee", unit: "JAR", agentPrice: 133.0, mrp: 155.0, shopRate: 144.15 },
-      item_107_bghee500mld: { name: "BGHEE 500ML DINING", barcode: "", section: "ghee", unit: "JAR", agentPrice: 317.0, mrp: 355.0, shopRate: 330.15 },
-      item_108_buffeloghee1: { name: "BUFFELOGHEE15KG TIN", barcode: "", section: "ghee", unit: "TIN", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9951.0 },
-      item_109_cowghee100m: { name: "COW GHEE 100ML JARS", barcode: "", section: "ghee", unit: "JAR", agentPrice: 66.0, mrp: 78.0, shopRate: 72.54 },
-      item_110_cowghee200m: { name: "COW GHEE 200ML JARS(60)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 123.0, mrp: 145.0, shopRate: 134.85 },
-      item_111_cowghee500m: { name: "COW GHEE 500ML JARS(08JARS)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 310.0, mrp: 350.0, shopRate: 325.5 },
-      item_112_cowghee1000: { name: "COW GHEE 1000 ML JARS(4)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 611.0, mrp: 700.0, shopRate: 651.0 },
-      item_113_cowghee500m: { name: "COWGHEE 500ML (8 PACK)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 303.0, mrp: 345.0, shopRate: 320.85 },
-      item_114_cowghee5kja: { name: "COWGHEE 5KG JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3050.0, mrp: 3350.0, shopRate: 3115.5 },
-      item_115_cowghee15kg: { name: "COWGHEE15KG TIN", barcode: "", section: "ghee", unit: "TIN", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9951.0 },
-      item_116_cowghee1000: { name: "COWGHEE1000ML (POUCH)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 602.0, mrp: 690.0, shopRate: 641.7 },
-      item_117_cowghee200m: { name: "COWGHEE200ML (PACK)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 121.0, mrp: 140.0, shopRate: 130.2 },
-      item_118_higharomagh: { name: "HIGH AROMA GHEE 100ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 73.0, mrp: 88.0, shopRate: 81.84 },
-      item_119_higharomagh: { name: "HIGH AROMA GHEE 200ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 140.0, mrp: 165.0, shopRate: 153.45 },
-      item_120_higharomagh: { name: "HIGH AROMA GHEE 500ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 320.0, mrp: 355.0, shopRate: 330.15 },
-      item_121_higharomagh: { name: "HIGH AROMA GHEE 1000ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 630.0, mrp: 710.0, shopRate: 660.3 },
-      item_122_higharomagh: { name: "HIGH AROMA GHEE 5L JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3200.0, mrp: 3500.0, shopRate: 3255.0 },
-      item_123_higharomagh: { name: "HIGH AROMA GHEE 15 KG JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9951.0 },
-      item_124_cowghee15ml: { name: "COW GHEE 15ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 8.3, mrp: 10.0, shopRate: 9.3 },
-      item_125_cowghee30ml: { name: "COW GHEE 30ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 16.6, mrp: 20.0, shopRate: 18.6 },
-      item_126_cowghee50ml: { name: "COW GHEE 50ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 34.0, mrp: 38.0, shopRate: 35.34 },
-      item_127_chakodi100g: { name: "CHAKODI 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.9 },
-      item_128_chakodi200g: { name: "CHAKODI 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.8 },
-      item_129_chakodi500g: { name: "CHAKODI 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 139.5 },
-      item_130_murukulong1: { name: "MURUKU LONG100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.9 },
-      item_131_murukulong2: { name: "MURUKU LONG200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.8 },
-      item_132_murukulong5: { name: "MURUKU LONG500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 139.5 },
-      item_133_karaboondhi: { name: "KARA BOONDHI 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.9 },
-      item_134_karaboondhi: { name: "KARA BOONDHI 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.8 },
-      item_135_karaboondhi: { name: "KARA BOONDHI 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 139.5 },
-      item_136_cornflaxesm: { name: "CORN FLAXES MIXTURE 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.9 },
-      item_137_cornflaxesm: { name: "CORN FLAXES MIXTURE 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.8 },
-      item_138_cornflaxesm: { name: "CORN FLAXES MIXTURE 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 139.5 },
-      item_139_jeerasoda20: { name: "JEERA SODA 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.95 },
-      item_140_lemonginger: { name: "LEMON GINGER 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.95 },
-      item_141_ornngecrush: { name: "ORNNGE CRUSH 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.95 },
-      item_142_mangomagic2: { name: "MANGO MAGIC-200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.95 },
-      item_143_mangomagic3: { name: "MANGO MAGIC-300ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 16.75, mrp: 20.0, shopRate: 18.6 },
-      item_144_mangomagic6: { name: "MANGO MAGIC-600ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 29.75, mrp: 35.0, shopRate: 32.55 },
-      item_145_mangomagic1: { name: "MANGO MAGIC-1000ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 50.0, mrp: 60.0, shopRate: 55.8 },
-      item_146_mangomagic2: { name: "MANGO MAGIC-2000ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 90.0, mrp: 110.0, shopRate: 102.3 },
-      item_147_ulavacharu1: { name: "ULAVACHARU-100GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 30.0, mrp: 35.0, shopRate: 32.55 },
-      item_148_ulavacharu2: { name: "ULAVACHARU-250GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 70.0, mrp: 80.0, shopRate: 74.4 },
-      item_149_ulavacharu5: { name: "ULAVACHARU-500GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 135.0, mrp: 155.0, shopRate: 144.15 },
-      item_150_ulavacharu1: { name: "ULAVACHARU-1000GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 245.0, mrp: 290.0, shopRate: 269.7 },
-      item_151_rusk55gmspa: { name: "RUSK 55GMS PACK(40)", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.5, mrp: 10.0, shopRate: 9.3 },
-      item_152_rusk200gmsp: { name: "RUSK 200GMS PACK(20)", barcode: "", section: "snacks", unit: "PKT", agentPrice: 26.0, mrp: 35.0, shopRate: 32.55 },
-      item_153_chillipowde: { name: "CHILLI POWDER(50GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 13.0, mrp: 20.0, shopRate: 18.6 },
-      item_154_chillipowde: { name: "CHILLI POWDER(100GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 26.0, mrp: 40.0, shopRate: 37.2 },
-      item_155_chillipowde: { name: "CHILLI POWDER(200GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 49.0, mrp: 75.0, shopRate: 69.75 },
-      item_156_turmericpow: { name: "TURMERIC POWDER(50G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 11.0, mrp: 20.0, shopRate: 18.6 },
-      item_157_turmericpow: { name: "TURMERIC POWDER(100GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 22.0, mrp: 35.0, shopRate: 32.55 },
-      item_158_sabarmasala: { name: "SABAR MASALA (8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.75, mrp: 5.0, shopRate: 4.65 },
-      item_159_sabarmasala: { name: "SABAR MASALA (50 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 16.0, mrp: 20.0, shopRate: 18.6 },
-      item_160_garammasala: { name: "GARAM MASALA (8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.9, mrp: 5.0, shopRate: 4.65 },
-      item_161_garammasala: { name: "GARAM MASALA (50 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 20.0, mrp: 35.0, shopRate: 32.55 },
-      item_162_chikenmasal: { name: "CHIKEN MASALA ( 8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.75, mrp: 5.0, shopRate: 4.65 },
-      item_163_attacookies: { name: "ATTA COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_164_attacookies: { name: "ATTA COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_165_attacookies: { name: "ATTA COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_166_multigrainc: { name: "MULTI GRAIN COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_167_multigrainc: { name: "MULTI GRAIN COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_168_multigrainc: { name: "MULTI GRAIN COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_169_sweetsamp: { name: "SWEETS &amp; SALT COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_170_sweetsamp: { name: "SWEETS &amp; SALT COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_171_sweetsamp: { name: "SWEETS &amp; SALT COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_172_ajwaincooki: { name: "AJWAIN COOKIES 20 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_173_ajwaincooki: { name: "AJWAIN COOKIES 50 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_174_ajwaincooki: { name: "AJWAIN COOKIES 100 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_175_butterscotc: { name: "BUTTER SCOTCH COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_176_butterscotc: { name: "BUTTER SCOTCH COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_177_butterscotc: { name: "BUTTER SCOTCH COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_178_coconutcooki: { name: "COCONUT COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_179_coconutcooki: { name: "COCONUT COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_180_coconutcooki: { name: "COCONUT COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_181_coffeecookie: { name: "COFFEE COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_182_coffeecookie: { name: "COFFEE COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_183_coffeecookie: { name: "COFFEE COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_184_chocolateco: { name: "CHOCOLATE COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_185_chocolateco: { name: "CHOCOLATE COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_186_chocolateco: { name: "CHOCOLATE COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_187_buttercookie: { name: "BUTTER COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_188_buttercookie: { name: "BUTTER COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_189_buttercookie: { name: "BUTTER COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_190_honeyoatscoo: { name: "HONEY OATS COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_191_honeyoatscoo: { name: "HONEY OATS COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_192_honeyoatscoo: { name: "HONEY OATS COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_193_spicymasala: { name: "SPICY MASALA COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 232.5 },
-      item_194_spicymasala: { name: "SPICY MASALA COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 186.0 },
-      item_195_spicymasala: { name: "SPICY MASALA COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 256.68 },
-      item_196_ialmondcooki: { name: "RAGI ALMOND COOKIES100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 35.0, mrp: 40.0, shopRate: 37.2 },
-      item_197_jowarcashe: { name: "JOWAR CASHEW COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 35.0, mrp: 40.0, shopRate: 37.2 },
-      item_198_sugarlessr: { name: "SUGAR LESS RAGI LADDU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 112.0, mrp: 130.0, shopRate: 120.9 },
-      item_199_sugarlesss: { name: "SUGAR LESS SUNNUNDALU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 112.0, mrp: 130.0, shopRate: 120.9 },
+      item_96_buffeloghee5: { name: "BUFFELOGHEE 500ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.0, mrp: 345.0, shopRate: 320.85 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v14";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v14";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v14";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v14";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v14";
-    const CLOUD_KEY_HOME = "annapurna_cloud_home_v14";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v16";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v16";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v16";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v16";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v16";
+    const CLOUD_KEY_HOME = "annapurna_cloud_home_v16";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -1114,7 +909,6 @@
     let lastCameraCode = "";
     let lastCameraScanTime = 0;
 
-    // 🛡️ ULTRA-SAFE DOM SETTER
     function setText(id, val) {
       const el = document.getElementById(id);
       if (el) el.innerText = val;
@@ -1179,7 +973,6 @@
     }
     window.getOrInitDayStock = getOrInitDayStock;
 
-    // Supermarket Dual-Tone Beep
     function playBigBeep(success = true) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1234,9 +1027,6 @@
     }
     window.showScanToast = showScanToast;
 
-    // =========================================================================
-    // 📷 MOBILE CAMERA BARCODE & QR SCANNER ENGINE
-    // =========================================================================
     window.openCameraScanner = async function(target = 'pos') {
       cameraScanTarget = target;
       const modal = document.getElementById("cameraScannerModal");
@@ -1317,14 +1107,11 @@
       showScanToast("Scanner Mode", mode === 'pos' ? "Customer POS Billing" : "Quick Stock-In (+1 Inward)", true);
     };
 
-    // Honeywell Scanner Listener
     let globalBarcodeBuffer = "";
     let lastKeyStrokeTime = Date.now();
 
     window.addEventListener("keydown", (e) => {
       const activeElement = document.activeElement;
-      const isInput = activeElement && (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA");
-
       const now = Date.now();
       const timeDiff = now - lastKeyStrokeTime;
       lastKeyStrokeTime = now;
@@ -1453,9 +1240,8 @@
       }
     }
 
-    // Add / Edit Product Modals
     window.openNewProductModal = function(initialBarcode = "") {
-      setText("productModalTitle", "Add New Product to Shop");
+      setText("productModalTitle", "Add New Product to Catalog");
       const form = document.getElementById("productEntryForm");
       if (form) form.reset();
       const keyInput = document.getElementById("formProductKey");
@@ -1463,7 +1249,7 @@
       const barInput = document.getElementById("formProductBarcode");
       if (barInput) barInput.value = initialBarcode || "";
       const unitInput = document.getElementById("formProductUnit");
-      if (unitInput) unitInput.value = "PKT";
+      if (unitInput) unitInput.value = "PLATE";
       const stockRow = document.getElementById("initialStockRow");
       if (stockRow) stockRow.classList.remove("hidden");
       setText("saveProductBtn", "Save to Catalog");
@@ -1481,8 +1267,8 @@
       setVal("formProductKey", itemKey);
       setVal("formProductName", it.name);
       setVal("formProductBarcode", it.barcode || "");
-      setVal("formProductSection", it.section || "milk");
-      setVal("formProductUnit", it.unit || "PKT");
+      setVal("formProductSection", it.section || "fastfood");
+      setVal("formProductUnit", it.unit || "PLATE");
       setVal("formProductAgentCost", it.agentPrice);
       setVal("formProductMrp", it.mrp);
       setVal("formProductShopRate", it.shopRate || it.mrp);
@@ -1624,7 +1410,7 @@
         return;
       }
 
-      const priorityOrder = ['tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'bucket10kg', 'ghee', 'buttermilk', 'lassi', 'paneer'];
+      const priorityOrder = ['cafe', 'bev', 'tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'ghee', 'paneer'];
       
       const sortedKeys = keys.sort((a, b) => {
         let idxA = priorityOrder.findIndex(p => a.toLowerCase().includes(p));
@@ -1742,82 +1528,6 @@
       loadDateData();
       renderDemandChart();
       showScanToast("Kirana Saved", `Delivery logged for ${shopName}!`, true);
-    };
-
-    window.applyKiranaQuickText = async function() {
-      const text = document.getElementById("kiranaQuickInput")?.value.trim() || "";
-      if (!text) return alert("Please enter dispatch text first.");
-
-      const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-      if (!lines.length) return;
-
-      const shopName = lines[0].replace(/[:\-]/g, '').trim();
-      const parsedItems = {};
-      let matchedCount = 0;
-
-      for (let i = 1; i < lines.length; i++) {
-        let line = lines[i].replace(/\(.*?\)/g, '').trim();
-        const match = line.match(/^(.+?)(?:[-\s:=]+)(\d+(?:\.\d+)?)\s*([a-zA-Z]*)/i);
-        if (match) {
-          let rawKey = match[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-          let qty = parseFloat(match[2]) || 0;
-
-          let matchedKey = Object.keys(masterItems).find(k => {
-            const cleanName = masterItems[k].name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            return k === rawKey || cleanName.includes(rawKey) || rawKey.includes(k);
-          });
-
-          if (matchedKey && masterItems[matchedKey]) {
-            parsedItems[matchedKey] = {
-              qty: qty,
-              sellRate: Number(masterItems[matchedKey].shopRate || masterItems[matchedKey].mrp)
-            };
-            matchedCount++;
-          }
-        }
-      }
-
-      if (matchedCount === 0) {
-        return alert("Could not match items. Make sure products are in your catalog first!");
-      }
-
-      const nameEl = document.getElementById("kiranaShopName");
-      if (nameEl) nameEl.value = shopName;
-
-      Object.keys(masterItems).forEach(k => {
-        const elQ = document.getElementById(`kqty_${k}`);
-        const elR = document.getElementById(`krate_${k}`);
-        if (parsedItems[k]) {
-          if (elQ) elQ.value = parsedItems[k].qty;
-          if (elR) elR.value = parsedItems[k].sellRate;
-        } else {
-          if (elQ) elQ.value = "";
-        }
-      });
-
-      calculateKiranaLivePreview();
-
-      const date = getActiveDate();
-      const logEntry = {
-        id: "kirana_" + Date.now(),
-        date,
-        shopName,
-        paymentStatus: "Not Paid",
-        note: "Quick bulk dispatch",
-        items: parsedItems
-      };
-
-      kiranaLogs.push(logEntry);
-      await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
-
-      const inputArea = document.getElementById("kiranaQuickInput");
-      if (inputArea) inputArea.value = "";
-
-      updateShopDatalist();
-      loadDateData();
-      renderDemandChart();
-
-      alert(`✔ Dispatched ${matchedCount} items to "${shopName}"! Status set to Not Paid.`);
     };
 
     function renderKiranaTable(entries) {
@@ -2146,7 +1856,7 @@
       if (keys.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full text-center py-12 text-slate-500 text-xs">
-            No products in catalog. Tap <b>"⚙️ Price & Catalog"</b> to add your products or scan with Honeywell/phone camera!
+            No products in catalog. Tap <b>"⚙️ Catalog"</b> to add your products or scan with Honeywell/phone camera!
           </div>
         `;
         return;
@@ -2154,8 +1864,7 @@
 
       keys.forEach(k => {
         const it = masterItems[k];
-        if (currentPosCategory === 'nobarcode' && it.section !== 'nobarcode' && it.barcode && it.barcode.length > 5) return;
-        if (currentPosCategory !== 'all' && currentPosCategory !== 'nobarcode' && it.section !== currentPosCategory) return;
+        if (currentPosCategory !== 'all' && it.section !== currentPosCategory) return;
 
         const btn = document.createElement("button");
         btn.type = "button";
@@ -2166,12 +1875,11 @@
         };
 
         let badgeColor = "text-sky-400";
-        if (it.section === "curd") badgeColor = "text-amber-400";
-        if (it.section === "bucket") badgeColor = "text-indigo-400";
+        if (it.section === "fastfood") badgeColor = "text-amber-400";
+        if (it.section === "beverages") badgeColor = "text-cyan-400";
+        if (it.section === "curd") badgeColor = "text-orange-400";
         if (it.section === "paneer") badgeColor = "text-emerald-400";
         if (it.section === "ghee") badgeColor = "text-yellow-400";
-        if (it.section === "drinks") badgeColor = "text-purple-400";
-        if (it.section === "nobarcode") badgeColor = "text-rose-400";
 
         btn.innerHTML = `
           <div>
@@ -2555,47 +2263,6 @@
       alert(`Stock inventory and in-store customer sales synced to cloud for ${getActiveDate()}!`);
     };
 
-    window.applyQuickLeftovers = async function() {
-      const text = document.getElementById("quickLeftoverText")?.value.trim() || "";
-      if (!text) return alert("Please enter leftover lines (e.g. tm 10, cowmilk 4).");
-
-      const dateStr = getActiveDate();
-      const lines = text.split("\n");
-      let matchCount = 0;
-
-      lines.forEach(line => {
-        const m = line.trim().match(/^(.+?)(?:[-\s:]+)(\d+(?:\.\d+)?)$/i);
-        if (m) {
-          const rawKey = m[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-          const qty = parseFloat(m[2]) || 0;
-
-          const matchedKey = Object.keys(masterItems).find(k => {
-            const cleanName = masterItems[k].name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            return k === rawKey || cleanName.includes(rawKey) || rawKey.includes(k);
-          });
-
-          if (matchedKey) {
-            if (!stockDays[dateStr][matchedKey]) {
-              stockDays[dateStr][matchedKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
-            }
-            stockDays[dateStr][matchedKey].leftover = qty;
-            matchCount++;
-          }
-        }
-      });
-
-      if (matchCount > 0) {
-        await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
-        const txtEl = document.getElementById("quickLeftoverText");
-        if (txtEl) txtEl.value = "";
-        loadDateData();
-        renderDemandChart();
-        alert(`Updated leftovers for ${matchCount} items! In-store retail customer sales recalculated.`);
-      } else {
-        alert("Could not match product names. Make sure products are added in your catalog!");
-      }
-    };
-
     function calculateOverallDailyMetrics(dayStock, kiranaEntries, dayExpenses, dayPosSales, dayHomeLogs) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
@@ -2694,9 +2361,6 @@
     }
     window.calculateOverallDailyMetrics = calculateOverallDailyMetrics;
 
-    // =========================================================================
-    // MASTER CATALOG TABLE & STATS DASHBOARD
-    // =========================================================================
     function renderMasterTable(filterQuery = "") {
       const tbody = document.getElementById("masterTableBody");
       if (!tbody) return;
@@ -2730,12 +2394,11 @@
         displayedCount++;
 
         let badgeColor = "text-sky-400";
-        if (it.section === "curd") badgeColor = "text-amber-400";
-        if (it.section === "bucket") badgeColor = "text-indigo-400";
+        if (it.section === "fastfood") badgeColor = "text-amber-400";
+        if (it.section === "beverages") badgeColor = "text-cyan-400";
+        if (it.section === "curd") badgeColor = "text-orange-400";
         if (it.section === "paneer") badgeColor = "text-emerald-400";
         if (it.section === "ghee") badgeColor = "text-yellow-400";
-        if (it.section === "drinks") badgeColor = "text-purple-400";
-        if (it.section === "nobarcode") badgeColor = "text-rose-400";
 
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-800/50 transition";
@@ -2810,9 +2473,6 @@
       a.click();
     };
 
-    // =========================================================================
-    // INITIALIZATION & REALTIME LISTENERS
-    // =========================================================================
     function attachLiveSyncListeners() {
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
         if (docSnap.exists()) {
