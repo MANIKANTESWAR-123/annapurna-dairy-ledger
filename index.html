@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Product Name *</label>
-            <input type="text" id="formProductName" required placeholder="e.g. TM 500ml, FCM 500ml, Ghee 500ml" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductName" required placeholder="e.g. FCM Gold Plus 500ml, Curd 450g Sachet" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -131,16 +131,19 @@
             <select id="formProductSection" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
               <option value="milk">Milk Varieties (TM, FCM, Cow Milk)</option>
               <option value="curd">Curd Packets &amp; Buckets</option>
-              <option value="ghee">Ghee (500ml, 1L, Jars)</option>
+              <option value="ghee">Ghee (500ml, 1L, Jars, Tins)</option>
               <option value="paneer">Paneer &amp; Butter</option>
               <option value="drinks">Lassi &amp; Buttermilk / Drinks</option>
-              <option value="general">Sweets &amp; Other Items</option>
+              <option value="sweets">Sweets &amp; Bi-Products</option>
+              <option value="snacks">Cookies, Chikkis &amp; Snacks</option>
+              <option value="spices">Spices &amp; Masalas</option>
+              <option value="general">Other Items</option>
             </select>
           </div>
 
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Unit</label>
-            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, BUCKET, JAR" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, BUCKET, JAR, CUP" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -196,26 +199,29 @@
             </button>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mt-1">POS Billing, Kirana Wholesale, Stock Procurement &amp; Cashflow Reconciliation</p>
+        <p class="text-xs text-slate-400 mt-1">POS Billing, Kirana Wholesale, Home Consumption, Cashflow &amp; Complete Sangam Rate Chart Catalog</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button type="button" id="tabBtnKirana" onclick="switchView('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
-            🏪 Kirana Deliveries
+            🏪 Kirana
           </button>
           <button type="button" id="tabBtnPos" onclick="switchView('pos')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
             ⚡ POS Billing
           </button>
+          <button type="button" id="tabBtnHome" onclick="switchView('home')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+            🏠 Home Use
+          </button>
           <button type="button" id="tabBtnRetail" onclick="switchView('retail')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
-            🛒 Stock Balance
+            🛒 Stock
           </button>
           <button type="button" id="tabBtnExpenses" onclick="switchView('expenses')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
-            💰 Cash &amp; Expenses
+            💰 Cash &amp; Exp
           </button>
           <button type="button" id="tabBtnMaster" onclick="switchView('master')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
-            ⚙️ Price &amp; Catalog
+            ⚙️ Catalog
           </button>
         </div>
 
@@ -260,7 +266,9 @@
       </div>
     </div>
 
-    <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER -->
+    <!-- ============================================================= -->
+    <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
+    <!-- ============================================================= -->
     <div id="viewKirana" class="space-y-6">
       <div class="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-3">
         <div class="flex justify-between items-center flex-wrap gap-2">
@@ -272,16 +280,16 @@
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>Cow Milk - 4</code>, <code>Big Curd - 2</code>, <code>Ghee 500ml - 1</code>).
+          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>FCM - 4</code>, <code>Small Curd - 10</code>, <code>5kg Bucket - 2</code>, <code>Ghee 500ml - 3</code>).
         </p>
-        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;Cow Milk - 3&#10;Big Curd - 2&#10;Ghee 500ml - 1&#10;Buttermilk - 10&#10;Lassi - 5&#10;Paneer - 2"></textarea>
+        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;FCM - 4&#10;Small Curd - 10&#10;5kg Bucket - 2&#10;Ghee 500ml - 1&#10;Buttermilk - 10&#10;Lassi - 5&#10;Paneer - 2"></textarea>
       </div>
 
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 flex-wrap gap-2">
           <div>
             <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Order layout: Milk (TM, FCM, Small Milk), Curd (Small Curd, Big Curd, 5kg/10kg Bucket), Ghee (500ml, 1L), Buttermilk, Lassi, Paneer, and others.</p>
+            <p class="text-xs text-slate-400">Order layout: Milk (TM, FCM, Small Milk), Curd (Small Curd, Big Curd, 5kg/10kg Bucket), Ghee (500ml, 1L), Buttermilk, Lassi, Paneer.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openNewProductModal()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
@@ -314,11 +322,13 @@
             </div>
           </div>
 
+          <!-- Dynamic Products Grid with Stepper Controls -->
           <div class="space-y-3 pt-2">
-            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities (Milk, Curd, Ghee, Buttermilk, Lassi, Paneer)</span>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities</span>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer"></div>
           </div>
 
+          <!-- Live Total & Submit -->
           <div class="flex flex-col md:flex-row justify-between items-center p-3.5 bg-slate-800 rounded-xl border border-slate-700 gap-3">
             <div class="text-xs text-slate-300 flex items-center gap-4">
               <span>Shop Bill: <strong class="text-white text-base mono" id="liveKiranaBill">₹0.00</strong></span>
@@ -385,7 +395,7 @@
           <button type="button" onclick="filterPosCategory('ghee')" class="px-3 py-1 bg-yellow-950 text-yellow-300 border border-yellow-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Ghee</button>
           <button type="button" onclick="filterPosCategory('paneer')" class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Paneer &amp; Butter</button>
           <button type="button" onclick="filterPosCategory('drinks')" class="px-3 py-1 bg-purple-950 text-purple-300 border border-purple-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Lassi &amp; Drinks</button>
-          <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fresh / Quick</button>
+          <button type="button" onclick="filterPosCategory('sweets')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Sweets &amp; Snacks</button>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[480px] overflow-y-auto pr-1" id="posProductGrid"></div>
@@ -443,7 +453,72 @@
       </div>
     </div>
 
-    <!-- VIEW 3: IN-STORE STOCK RECONCILIATION -->
+    <!-- VIEW 3: HOME CONSUMPTION & SELF-USE LEDGER -->
+    <div id="viewHome" class="space-y-6 hidden">
+      <div class="bg-indigo-950/30 p-5 rounded-2xl border border-indigo-800/60 shadow-xl space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-white">🏠 Home Consumption &amp; Self-Use Log</h2>
+          <p class="text-xs text-slate-400">Record milk, curd, or items taken for home use, personal consumption, or family members (Mani, Narasimha, Shop).</p>
+        </div>
+
+        <form id="homeConsumptionForm" onsubmit="handleHomeConsumptionSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Recipient / Consumption Type *</label>
+            <select id="homeRecipient" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-bold">
+              <option value="Home" selected>🏠 Home (General Family)</option>
+              <option value="Mani">👦 Mani</option>
+              <option value="Narasimha">👨 Narasimha</option>
+              <option value="Shop">🏪 Shop Use / Tasting</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Select Product *</label>
+            <select id="homeProductKey" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"></select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Quantity Taken *</label>
+            <input type="number" step="any" min="0.1" id="homeQty" required placeholder="e.g. 1, 2" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-emerald-400 mono font-bold focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div class="flex items-end">
+            <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
+              Log Home Use
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Home Consumption Ledger Table -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">Home &amp; Self-Use Log (<span id="homeDateDisplay">--</span>)</h2>
+            <p class="text-xs text-slate-400">Items taken off stock without sale</p>
+          </div>
+          <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono" id="homeCountBadge">0 Entries</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[10.5px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Time</th>
+                <th class="p-3">Recipient</th>
+                <th class="p-3">Product Name</th>
+                <th class="p-3 text-center">Quantity</th>
+                <th class="p-3 text-right">Value (at MRP)</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="homeTableBody" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: IN-STORE STOCK RECONCILIATION -->
     <div id="viewRetail" class="space-y-6 hidden">
       <div class="bg-sky-950/40 p-4 rounded-2xl border border-sky-800/60 shadow-lg space-y-2">
         <div class="flex justify-between items-center">
@@ -457,14 +532,14 @@
         <p class="text-[11px] text-slate-300">
           Type unsold packets remaining in fridge. Customer sales at MRP will calculate automatically!
         </p>
-        <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;cowmilk 4&#10;curd 5"></textarea>
+        <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 5"></textarea>
       </div>
 
       <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
             <h2 class="text-sm font-bold text-white uppercase tracking-wider">In-Store Customer &amp; Stock Balance (<span id="stockDateDisplay">--</span>)</h2>
-            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Sold = Available − Kirana − Leftover − Home</p>
+            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Sold = Available − Kirana − Home − Leftover</p>
           </div>
           <button type="button" onclick="saveDayStockRecord()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
             Save Today Stock
@@ -481,8 +556,8 @@
                 <th class="p-3 text-center bg-slate-850">Inward (+)</th>
                 <th class="p-3 text-center font-bold text-white">Total Avail</th>
                 <th class="p-3 text-center text-amber-300">Kirana Sent</th>
+                <th class="p-3 text-center bg-indigo-950 text-indigo-300 font-bold">Home Use</th>
                 <th class="p-3 text-center bg-sky-950/50 text-sky-300 font-bold">Fridge Leftover</th>
-                <th class="p-3 text-center">Home/Damage</th>
                 <th class="p-3 text-center text-emerald-400 font-bold bg-emerald-950/40">Cust. Sold (MRP)</th>
                 <th class="p-3 text-right">Retail Revenue</th>
                 <th class="p-3 text-right text-emerald-400 font-bold">Retail Profit</th>
@@ -494,7 +569,7 @@
       </div>
     </div>
 
-    <!-- VIEW 4: MONEY SPENT ON STOCK & EXPENSES -->
+    <!-- VIEW 5: MONEY SPENT ON STOCK & EXPENSES -->
     <div id="viewExpenses" class="space-y-6 hidden">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
@@ -640,7 +715,7 @@
       </div>
     </div>
 
-    <!-- VIEW 5: STOCK INVENTORY MASTER & PRODUCT CATALOG -->
+    <!-- VIEW 6: STOCK INVENTORY MASTER & PRODUCT CATALOG -->
     <div id="viewMaster" class="space-y-6 hidden">
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
@@ -826,17 +901,19 @@
       paneer: { name: "Fresh Paneer 200g", barcode: "", section: "paneer", unit: "PKT", agentPrice: 70.00, mrp: 85.00, shopRate: 78.00 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v13";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v13";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v13";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v13";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v13";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v14";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v14";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v14";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v14";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v14";
+    const CLOUD_KEY_HOME = "annapurna_cloud_home_v14";
 
     let masterItems = {};
     let kiranaLogs = [];
     let stockDays = {};
     let posSalesLogs = [];
     let expenseLogs = [];
+    let homeLogs = [];
     let posCart = {};
     let currentPayMode = 'Cash';
     let currentPosCategory = 'all';
@@ -845,7 +922,6 @@
     let scannerMode = 'pos';
     let pendingUnmappedBarcode = "";
 
-    // Camera Scanner state
     let html5QrScannerInstance = null;
     let cameraScanTarget = 'pos';
     let lastCameraCode = "";
@@ -1180,6 +1256,7 @@
       renderMasterTable();
       renderPosGrid();
       renderKiranaFormFields();
+      populateHomeProductDropdown();
 
       if (scannerMode === 'stock') {
         processHoneywellBarcode(code);
@@ -1189,7 +1266,7 @@
       }
     }
 
-    // Add / Edit Product Modals (Camera button removed from form as requested)
+    // Add / Edit Product Modals
     window.openNewProductModal = function(initialBarcode = "") {
       setText("productModalTitle", "Add New Product to Shop");
       const form = document.getElementById("productEntryForm");
@@ -1245,7 +1322,6 @@
       if (barEl) barEl.value = code;
     };
 
-    // Product Save Form Handler
     window.handleProductFormSubmit = async function(e) {
       if (e && e.preventDefault) e.preventDefault();
       try {
@@ -1300,6 +1376,7 @@
         renderMasterTable();
         renderPosGrid();
         renderKiranaFormFields();
+        populateHomeProductDropdown();
         loadDateData();
 
         showScanToast(existingKey ? "Product Updated" : "New Product Added", `${name} saved to catalog!`, true);
@@ -1321,6 +1398,7 @@
         renderMasterTable();
         renderPosGrid();
         renderKiranaFormFields();
+        populateHomeProductDropdown();
         loadDateData();
         renderDemandChart();
         showScanToast("Product Deleted", `${it.name} removed from catalog`, false);
@@ -1335,6 +1413,7 @@
         renderMasterTable();
         renderPosGrid();
         renderKiranaFormFields();
+        populateHomeProductDropdown();
         loadDateData();
         showScanToast("Catalog Cleared", "All products removed. Ready for fresh scan!", false);
       }
@@ -1358,7 +1437,7 @@
         return;
       }
 
-      // Sorted order: Milk (tm, fcm, cowmilk, smilk), Curd (scurd, curd450, bucket5kg, bucket10kg), Ghee (ghee500, ghee1000), others (buttermilk, lassi, paneer)
+      // Priority grouping: Milk, Curd, Ghee, Buttermilk, Lassi, Paneer
       const priorityOrder = ['tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'bucket10kg', 'ghee', 'buttermilk', 'lassi', 'paneer'];
       
       const sortedKeys = keys.sort((a, b) => {
@@ -1681,6 +1760,111 @@
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
     }
     window.updateShopDatalist = updateShopDatalist;
+
+    // =========================================================================
+    // 🏠 HOME CONSUMPTION & SELF-USE LEDGER CONTROLLER
+    // =========================================================================
+    function populateHomeProductDropdown() {
+      const sel = document.getElementById("homeProductKey");
+      if (!sel) return;
+      sel.innerHTML = "";
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.innerText = `${it.name} (MRP: ₹${it.mrp})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    window.handleHomeConsumptionSubmit = async function(e) {
+      e.preventDefault();
+      const dateStr = getActiveDate();
+      const recipient = document.getElementById("homeRecipient")?.value || "Home";
+      const productKey = document.getElementById("homeProductKey")?.value;
+      const qty = parseFloat(document.getElementById("homeQty")?.value) || 0;
+
+      if (!productKey || qty <= 0) return alert("Please select a product and valid quantity.");
+      const it = masterItems[productKey];
+      if (!it) return;
+
+      const homeItem = {
+        id: "home_" + Date.now(),
+        date: dateStr,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        recipient,
+        productKey,
+        productName: it.name,
+        qty,
+        unit: it.unit,
+        value: qty * Number(it.mrp)
+      };
+
+      homeLogs.push(homeItem);
+      await cloudSet(CLOUD_KEY_HOME, JSON.stringify(homeLogs));
+
+      // Also deduct from today's stock leftover / add to home usage
+      if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
+      if (!stockDays[dateStr][productKey]) {
+        stockDays[dateStr][productKey] = { opening: 0, inward: 0, leftover: 0, home: 0 };
+      }
+      stockDays[dateStr][productKey].home = (Number(stockDays[dateStr][productKey].home) || 0) + qty;
+      const curLeft = Number(stockDays[dateStr][productKey].leftover) || 0;
+      stockDays[dateStr][productKey].leftover = Math.max(0, curLeft - qty);
+
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+
+      const qtyEl = document.getElementById("homeQty");
+      if (qtyEl) qtyEl.value = "";
+
+      playBigBeep(true);
+      showScanToast("Home Use Logged", `${qty} ${it.unit} ${it.name} taken for ${recipient}`, true);
+      loadDateData();
+    };
+
+    window.deleteHomeEntry = async function(id) {
+      if (confirm("Delete this home consumption record?")) {
+        homeLogs = homeLogs.filter(h => h.id !== id);
+        await cloudSet(CLOUD_KEY_HOME, JSON.stringify(homeLogs));
+        loadDateData();
+      }
+    };
+
+    function renderHomeTable(dayHomeLogs) {
+      const tbody = document.getElementById("homeTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      setText("homeCountBadge", `${dayHomeLogs.length} Entries`);
+
+      if (dayHomeLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 text-xs">No home consumption logged for this date.</td></tr>`;
+        return;
+      }
+
+      dayHomeLogs.forEach(h => {
+        let badgeColor = "bg-indigo-950 text-indigo-300 border-indigo-800";
+        if (h.recipient === 'Mani') badgeColor = "bg-sky-950 text-sky-300 border-sky-800";
+        else if (h.recipient === 'Narasimha') badgeColor = "bg-emerald-950 text-emerald-300 border-emerald-800";
+        else if (h.recipient === 'Shop') badgeColor = "bg-amber-950 text-amber-300 border-amber-800";
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 mono text-slate-400 text-[11px]">${h.time || '--'}</td>
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${badgeColor}">${h.recipient}</span>
+          </td>
+          <td class="p-3 font-semibold text-white">${h.productName}</td>
+          <td class="p-3 text-center mono font-bold text-emerald-400">${h.qty} ${h.unit}</td>
+          <td class="p-3 text-right mono font-bold text-white">₹${Number(h.value).toFixed(2)}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteHomeEntry('${h.id}')" class="text-rose-400 hover:text-rose-300 font-semibold text-xs">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    window.renderHomeTable = renderHomeTable;
 
     // =========================================================================
     // 💰 EXPENSE TRACKER CONTROLLER
@@ -2043,16 +2227,19 @@
       setText("stockDateDisplay", `${dateStr} (${dayName})`);
       setText("kiranaDateDisplay", `${dateStr} (${dayName})`);
       setText("expenseDateDisplay", `${dateStr} (${dayName})`);
+      setText("homeDateDisplay", `${dateStr} (${dayName})`);
 
       const dayStock = getOrInitDayStock(dateStr);
       const dayKiranaEntries = kiranaLogs.filter(e => e.date === dateStr);
       const dayExpenses = expenseLogs.filter(e => e.date === dateStr);
       const dayPosSales = posSalesLogs.filter(e => e.date === dateStr);
+      const dayHomeLogs = homeLogs.filter(e => e.date === dateStr);
 
-      renderRetailStockTable(dayStock, dayKiranaEntries);
+      renderRetailStockTable(dayStock, dayKiranaEntries, dayHomeLogs);
       renderKiranaTable(dayKiranaEntries);
       renderExpenseTable(dayExpenses);
-      calculateOverallDailyMetrics(dayStock, dayKiranaEntries, dayExpenses, dayPosSales);
+      renderHomeTable(dayHomeLogs);
+      calculateOverallDailyMetrics(dayStock, dayKiranaEntries, dayExpenses, dayPosSales, dayHomeLogs);
     }
     window.loadDateData = loadDateData;
 
@@ -2068,12 +2255,24 @@
     }
     window.getKiranaSentTotalPerItem = getKiranaSentTotalPerItem;
 
-    function renderRetailStockTable(dayStock, kiranaEntries) {
+    function getHomeSentTotalPerItem(homeEntries) {
+      const totals = {};
+      Object.keys(masterItems).forEach(k => totals[k] = 0);
+      homeEntries.forEach(h => {
+        if (totals[h.productKey] !== undefined) {
+          totals[h.productKey] += Number(h.qty) || 0;
+        }
+      });
+      return totals;
+    }
+
+    function renderRetailStockTable(dayStock, kiranaEntries, dayHomeLogs) {
       const tbody = document.getElementById("retailStockTableBody");
       if (!tbody) return;
       tbody.innerHTML = "";
 
       const kiranaSent = getKiranaSentTotalPerItem(kiranaEntries);
+      const homeSent = getHomeSentTotalPerItem(dayHomeLogs);
       let totalFridgeUnits = 0;
 
       const keys = Object.keys(masterItems);
@@ -2091,12 +2290,12 @@
         const inward = Number(stockData.inward) || 0;
         const totalAvail = opening + inward;
         const sentToKirana = kiranaSent[k] || 0;
+        const homeUsed = (Number(stockData.home) || 0) + (homeSent[k] || 0);
         const leftover = Number(stockData.leftover) || 0;
-        const home = Number(stockData.home) || 0;
 
         totalFridgeUnits += leftover;
 
-        const retailCustSold = Math.max(0, totalAvail - sentToKirana - leftover - home);
+        const retailCustSold = Math.max(0, totalAvail - sentToKirana - leftover - homeUsed);
         const retailRevenue = retailCustSold * Number(item.mrp);
         const retailProfit = retailCustSold * (Number(item.mrp) - Number(item.agentPrice));
 
@@ -2126,15 +2325,11 @@
           </td>
           <td class="p-3 text-center font-bold text-white mono">${totalAvail}</td>
           <td class="p-3 text-center font-bold text-amber-300 mono">${sentToKirana}</td>
+          <td class="p-3 text-center font-bold text-indigo-300 mono bg-indigo-950/20">${homeUsed}</td>
           <td class="p-3 text-center bg-sky-950/30">
             <input type="number" step="any" min="0" value="${leftover}" 
               class="w-16 bg-slate-800 border border-sky-600 text-center px-1.5 py-1 rounded text-sky-300 mono font-bold focus:outline-none focus:ring-1 focus:ring-sky-400"
               onchange="updateStockField('${k}', 'leftover', this.value)">
-          </td>
-          <td class="p-3 text-center">
-            <input type="number" step="any" min="0" value="${home}" 
-              class="w-14 bg-slate-800 border border-slate-700 text-center px-1.5 py-1 rounded text-slate-300 mono"
-              onchange="updateStockField('${k}', 'home', this.value)">
           </td>
           <td class="p-3 text-center font-bold text-emerald-300 mono bg-emerald-950/40 text-sm">
             ${retailCustSold}
@@ -2216,7 +2411,7 @@
       }
     };
 
-    function calculateOverallDailyMetrics(dayStock, kiranaEntries, dayExpenses, dayPosSales) {
+    function calculateOverallDailyMetrics(dayStock, kiranaEntries, dayExpenses, dayPosSales, dayHomeLogs) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
       let kiranaDue = 0;
@@ -2368,7 +2563,7 @@
             ${it.barcode ? `<span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 text-[11px]">🏷️ ${it.barcode}</span>` : `<span class="text-slate-500 text-[10px]">— Unassigned —</span>`}
           </td>
           <td class="p-3 text-center uppercase font-bold text-[10px] ${badgeColor}">${it.section || 'General'}</td>
-          <td class="p-3 text-center text-slate-400 font-medium">${it.unit || 'LTR'}</td>
+          <td class="p-3 text-center text-slate-400 font-medium">${it.unit || 'PKT'}</td>
           <td class="p-3 text-right mono font-bold text-emerald-400">₹${Number(it.agentPrice).toFixed(2)}</td>
           <td class="p-3 text-right mono font-bold text-white">₹${Number(it.mrp).toFixed(2)}</td>
           <td class="p-3 text-right mono font-bold text-sky-300">₹${Number(it.shopRate || it.mrp).toFixed(2)}</td>
@@ -2440,6 +2635,7 @@
           renderPosGrid();
           renderMasterTable();
           renderKiranaFormFields();
+          populateHomeProductDropdown();
           loadDateData();
         }
       });
@@ -2475,6 +2671,13 @@
           loadDateData();
         }
       });
+
+      onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_HOME), (docSnap) => {
+        if (docSnap.exists()) {
+          homeLogs = JSON.parse(docSnap.data().value);
+          loadDateData();
+        }
+      });
     }
 
     async function initialLoad() {
@@ -2497,13 +2700,16 @@
       const eRes = await cloudGet(CLOUD_KEY_EXPENSES);
       if (eRes && eRes.value) expenseLogs = JSON.parse(eRes.value);
 
+      const hRes = await cloudGet(CLOUD_KEY_HOME);
+      if (hRes && hRes.value) homeLogs = JSON.parse(hRes.value);
+
       const defaultDate = getLocalDateString();
       const dateEl = document.getElementById("selectedDate");
       if (dateEl) dateEl.value = defaultDate;
 
       renderPosGrid();
       renderKiranaFormFields();
-      updateShopDatalist();
+      populateHomeProductDropdown();
       loadDateData();
       renderMasterTable();
       renderDemandChart();
@@ -2512,7 +2718,7 @@
     }
 
     window.switchView = function(viewKey) {
-      const views = ['kirana', 'pos', 'retail', 'expenses', 'master'];
+      const views = ['kirana', 'pos', 'home', 'retail', 'expenses', 'master'];
       views.forEach(v => {
         const el = document.getElementById(`view${v.charAt(0).toUpperCase() + v.slice(1)}`);
         if (el) el.classList.toggle("hidden", viewKey !== v);
@@ -2530,6 +2736,7 @@
       if (viewKey === 'master') renderMasterTable();
       else if (viewKey === 'pos') renderPosGrid();
       else if (viewKey === 'kirana') renderKiranaFormFields();
+      else if (viewKey === 'home') populateHomeProductDropdown();
       else loadDateData();
     };
 
