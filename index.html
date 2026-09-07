@@ -101,7 +101,7 @@
     </div>
   </div>
 
-  <!-- Modal 2: Add / Edit Product Form (Camera button removed) -->
+  <!-- Modal 2: Add / Edit Product Form -->
   <div id="productFormModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 hidden backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Product Name *</label>
-            <input type="text" id="formProductName" required placeholder="e.g. TM 500ml, Cow Milk, Paneer, Sweet Lassi" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductName" required placeholder="e.g. TM, FCM, Small Milk, Big Curd, Ghee 500ml" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -130,18 +130,18 @@
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Category / Section *</label>
             <select id="formProductSection" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
               <option value="milk">Milk Varieties (TM, FCM, Cow Milk)</option>
-              <option value="curd">Curd Packets &amp; Sachets</option>
-              <option value="bucket">Curd Buckets (Bulk)</option>
-              <option value="paneer">Paneer &amp; Ghee</option>
+              <option value="curd">Curd Packets &amp; Buckets</option>
+              <option value="ghee">Ghee (500ml, 1L, Jars)</option>
+              <option value="paneer">Paneer &amp; Butter</option>
               <option value="drinks">Lassi &amp; Buttermilk / Drinks</option>
               <option value="nobarcode">⚡ Fresh / Loose / Quick Pick</option>
-              <option value="general">Other Dairy Products</option>
+              <option value="general">Other Items</option>
             </select>
           </div>
 
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Unit</label>
-            <input type="text" id="formProductUnit" value="LTR" placeholder="LTR, PKT, KG, CUP, BTL" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, CUP, BUCKET" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -167,7 +167,7 @@
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
           <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl uppercase">Cancel</button>
-          <button type="submit" id="saveProductBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl uppercase shadow-lg">Save to Catalog</button>
+          <button type="submit" id="saveProductBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase shadow-lg">Save to Catalog</button>
         </div>
       </form>
     </div>
@@ -192,7 +192,6 @@
             <button type="button" id="scanModeStockBtn" onclick="setScannerMode('stock')" class="px-2 py-0.5 rounded-lg font-bold transition text-slate-400 hover:text-white">
               📦 Stock-In
             </button>
-            <!-- Mobile Camera Scanner Trigger for Counter Billing -->
             <button type="button" onclick="openCameraScanner(scannerMode)" class="px-2.5 py-0.5 rounded-lg font-bold bg-sky-600 hover:bg-sky-500 text-white text-xs flex items-center gap-1 shadow">
               <span>📷</span> Phone Scan
             </button>
@@ -274,16 +273,16 @@
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>Cow milk - 4</code>, <code>Curd - 10</code>).
+          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>Cow Milk - 4</code>, <code>Big Curd - 2</code>, <code>Ghee 500ml - 3</code>).
         </p>
-        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;Cow Milk - 3&#10;Curd - 4"></textarea>
+        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;Cow Milk - 3&#10;Big Curd - 2&#10;Ghee 500ml - 1&#10;Buttermilk - 10&#10;Lassi - 5&#10;Paneer - 2"></textarea>
       </div>
 
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 flex-wrap gap-2">
           <div>
             <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Tap <b>[-] 2 [+]</b> to adjust delivery quantity or edit shop rates</p>
+            <p class="text-xs text-slate-400">Order layout: Milk (TM, FCM, Small Milk), Curd (Small Curd, Big Curd, 5kg/10kg Bucket), Ghee (500ml, 1L), Buttermilk, Lassi, Paneer, and others.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openNewProductModal()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
@@ -318,7 +317,7 @@
 
           <!-- Dynamic Products Grid with Stepper Controls -->
           <div class="space-y-3 pt-2">
-            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities</span>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities (Milk, Curd, Ghee, Buttermilk, Lassi, Paneer)</span>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer"></div>
           </div>
 
@@ -373,7 +372,6 @@
             <p class="text-xs text-slate-400">Swipe Honeywell scanner or use mobile camera scan below</p>
           </div>
           <div class="flex items-center gap-2">
-            <!-- Mobile Camera Billing Trigger -->
             <button type="button" onclick="openCameraScanner('pos')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
               <span>📷</span> Phone Camera
             </button>
@@ -388,7 +386,8 @@
           <button type="button" onclick="filterPosCategory('all')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition">All</button>
           <button type="button" onclick="filterPosCategory('milk')" class="px-3 py-1 bg-sky-950 text-sky-300 border border-sky-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Milk</button>
           <button type="button" onclick="filterPosCategory('curd')" class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Curd &amp; Buckets</button>
-          <button type="button" onclick="filterPosCategory('paneer')" class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Paneer &amp; Ghee</button>
+          <button type="button" onclick="filterPosCategory('ghee')" class="px-3 py-1 bg-yellow-950 text-yellow-300 border border-yellow-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Ghee</button>
+          <button type="button" onclick="filterPosCategory('paneer')" class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Paneer &amp; Butter</button>
           <button type="button" onclick="filterPosCategory('drinks')" class="px-3 py-1 bg-purple-950 text-purple-300 border border-purple-800 rounded-lg text-xs font-semibold uppercase tracking-wider">Lassi &amp; Drinks</button>
           <button type="button" onclick="filterPosCategory('nobarcode')" class="px-3 py-1 bg-rose-950 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold uppercase tracking-wider">⚡ Fresh / Quick</button>
         </div>
@@ -773,7 +772,7 @@
     <div id="barcodeSheetGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;"></div>
   </div>
 
-  <!-- Firebase Script & Engine -->
+  <!-- Firebase Script & App Engine -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -814,14 +813,13 @@
       }
     }
 
-    // Clean slate: 0 default products
     const DEFAULT_MASTER_ITEMS = {};
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v11";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v11";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v11";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v11";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v11";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v12";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v12";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v12";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v12";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v12";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -963,7 +961,7 @@
     window.showScanToast = showScanToast;
 
     // =========================================================================
-    // 📷 MOBILE CAMERA BARCODE & QR SCANNER ENGINE (FOR BILLING & STOCK-IN)
+    // 📷 MOBILE CAMERA BARCODE & QR SCANNER ENGINE
     // =========================================================================
     window.openCameraScanner = async function(target = 'pos') {
       cameraScanTarget = target;
@@ -1025,6 +1023,7 @@
       lastCameraScanTime = now;
 
       playBigBeep(true);
+      closeCameraScanner();
       processHoneywellBarcode(decodedText.trim());
     }
 
@@ -1179,7 +1178,7 @@
       }
     }
 
-    // Add / Edit Product Modals
+    // Add / Edit Product Modals (Camera button removed from form)
     window.openNewProductModal = function(initialBarcode = "") {
       setText("productModalTitle", "Add New Product to Shop");
       const form = document.getElementById("productEntryForm");
@@ -1189,7 +1188,7 @@
       const barInput = document.getElementById("formProductBarcode");
       if (barInput) barInput.value = initialBarcode || "";
       const unitInput = document.getElementById("formProductUnit");
-      if (unitInput) unitInput.value = "LTR";
+      if (unitInput) unitInput.value = "PKT";
       const stockRow = document.getElementById("initialStockRow");
       if (stockRow) stockRow.classList.remove("hidden");
       setText("saveProductBtn", "Save to Catalog");
@@ -1208,7 +1207,7 @@
       setVal("formProductName", it.name);
       setVal("formProductBarcode", it.barcode || "");
       setVal("formProductSection", it.section || "milk");
-      setVal("formProductUnit", it.unit || "LTR");
+      setVal("formProductUnit", it.unit || "PKT");
       setVal("formProductAgentCost", it.agentPrice);
       setVal("formProductMrp", it.mrp);
       setVal("formProductShopRate", it.shopRate || it.mrp);
@@ -1245,7 +1244,7 @@
         const name = getVal("formProductName").trim();
         const barcode = getVal("formProductBarcode").trim();
         const section = getVal("formProductSection");
-        const unit = (getVal("formProductUnit").trim() || "LTR").toUpperCase();
+        const unit = (getVal("formProductUnit").trim() || "PKT").toUpperCase();
         const agentPrice = parseFloat(getVal("formProductAgentCost")) || 0;
         const mrp = parseFloat(getVal("formProductMrp")) || 0;
         const shopRate = parseFloat(getVal("formProductShopRate")) || mrp;
@@ -1331,7 +1330,7 @@
     };
 
     // =========================================================================
-    // 🏪 KIRANA DELIVERY WITH TOUCH STEPPERS [-] Qty [+]
+    // 🏪 KIRANA ORDER & DELIVERY (SORTED BY USER SPECIFICATION)
     // =========================================================================
     function renderKiranaFormFields() {
       const container = document.getElementById("kiranaDynamicItemsContainer");
@@ -1348,7 +1347,18 @@
         return;
       }
 
-      keys.forEach(k => {
+      // Order configuration requested: Milk (tm, fcm, small milk), Curd (small curd, big curd, 5kg bucket, 10kg bucket), Ghee (500ml, 1l), buttermilk, lassi, paneer, and others.
+      const priorityOrder = ['tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'bucket10kg', 'ghee', 'buttermilk', 'lassi', 'paneer'];
+      
+      const sortedKeys = keys.sort((a, b) => {
+        let idxA = priorityOrder.findIndex(p => a.toLowerCase().includes(p));
+        let idxB = priorityOrder.findIndex(p => b.toLowerCase().includes(p));
+        if (idxA === -1) idxA = 999;
+        if (idxB === -1) idxB = 999;
+        return idxA - idxB;
+      });
+
+      sortedKeys.forEach(k => {
         const it = masterItems[k];
         const card = document.createElement("div");
         card.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2.5 hover:border-slate-700 transition";
@@ -2114,7 +2124,7 @@
               class="w-14 bg-slate-800 border border-slate-700 text-center px-1.5 py-1 rounded text-slate-300 mono"
               onchange="updateStockField('${k}', 'home', this.value)">
           </td>
-          <td class="p-3 text-center font-bold text-emerald-300 mono bg-emerald-950/30 text-sm">
+          <td class="p-3 text-center font-bold text-emerald-300 mono bg-emerald-950/40 text-sm">
             ${retailCustSold}
           </td>
           <td class="p-3 text-right mono font-bold text-white">₹${retailRevenue.toFixed(2)}</td>
@@ -2331,6 +2341,7 @@
         if (it.section === "curd") badgeColor = "text-amber-400";
         if (it.section === "bucket") badgeColor = "text-indigo-400";
         if (it.section === "paneer") badgeColor = "text-emerald-400";
+        if (it.section === "ghee") badgeColor = "text-yellow-400";
         if (it.section === "drinks") badgeColor = "text-purple-400";
         if (it.section === "nobarcode") badgeColor = "text-rose-400";
 
