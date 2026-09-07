@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annapurna Dairy — POS Billing &amp; Inventory System</title>
+  <title>Annapurna Dairy &amp; Cafe — POS Billing &amp; Inventory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- HTML5 Mobile Camera Barcode & QR Scanner Library -->
@@ -129,11 +129,11 @@
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Category / Section *</label>
             <select id="formProductSection" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-              <option value="fastfood">🍟 Fast Food &amp; Cafe (Fries, Momos, Fruit Salad)</option>
-              <option value="beverages">🥤 Cool Drinks &amp; Beverages (Water, ThumsUp)</option>
-              <option value="milk">Milk Varieties (TM, FCM)</option>
+              <option value="fastfood">🍟 Fast Food &amp; Cafe (Fries, Momos, Fruit Salad, Sprouts)</option>
+              <option value="beverages">🥤 Cool Drinks &amp; Beverages (Water, ThumsUp, Sprite)</option>
+              <option value="milk">Milk Varieties</option>
               <option value="curd">Curd Packets &amp; Buckets</option>
-              <option value="ghee">Ghee (Jars, Tins)</option>
+              <option value="ghee">Ghee</option>
               <option value="paneer">Paneer &amp; Butter</option>
               <option value="sweets">Sweets &amp; Bi-Products</option>
               <option value="snacks">Cookies &amp; Snacks</option>
@@ -275,7 +275,7 @@
         <div class="flex justify-between items-center pb-3 border-b border-slate-800 flex-wrap gap-2">
           <div>
             <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Order layout: Milk, Curd, Ghee, Paneer, Fast Food items, and Beverages.</p>
+            <p class="text-xs text-slate-400">Order layout: Fast Food, Drinks, Milk, Curd, Ghee, Paneer, Sweets.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openNewProductModal()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
@@ -445,7 +445,7 @@
       <div class="bg-indigo-950/30 p-5 rounded-2xl border border-indigo-800/60 shadow-xl space-y-4">
         <div>
           <h2 class="text-base font-bold text-white">🏠 Home Consumption &amp; Self-Use Log</h2>
-          <p class="text-xs text-slate-400">Record milk, curd, or items taken for home use, personal consumption, or family members (Mani, Narasimha, Shop).</p>
+          <p class="text-xs text-slate-400">Record items taken for home use, personal consumption, or family members (Mani, Narasimha, Shop).</p>
         </div>
 
         <form id="homeConsumptionForm" onsubmit="handleHomeConsumptionSubmit(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -703,7 +703,7 @@
               <span>🖨️</span> Barcode Sheet
             </button>
             <button type="button" onclick="clearCatalogPrompt()" class="px-3.5 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-xs font-bold text-rose-300 rounded-lg uppercase tracking-wider">
-              🗑️ Clear All
+              🗑️ Reset Catalog
             </button>
             <button type="button" onclick="exportMasterCSV()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-lg uppercase tracking-wider border border-slate-700">
               Export CSV
@@ -865,30 +865,219 @@
       cafe_fruitsalad: { name: "Fruit Salad", barcode: "FS01", section: "fastfood", unit: "BOWL", agentPrice: 30.0, mrp: 60.0, shopRate: 60.0 },
       cafe_fruitsaladcust: { name: "Fruit Salad with Custard", barcode: "FSC1", section: "fastfood", unit: "BOWL", agentPrice: 40.0, mrp: 80.0, shopRate: 80.0 },
       cafe_sprouts: { name: "Sprouts", barcode: "SP01", section: "fastfood", unit: "BOWL", agentPrice: 20.0, mrp: 40.0, shopRate: 40.0 },
-
       bev_water: { name: "Water Bottle (1L)", barcode: "WAT1", section: "beverages", unit: "BOTTLE", agentPrice: 12.0, mrp: 20.0, shopRate: 18.0 },
       bev_thumsup: { name: "Thums Up (500ml)", barcode: "THU1", section: "beverages", unit: "BOTTLE", agentPrice: 22.0, mrp: 40.0, shopRate: 35.0 },
+      bev_sprite: { name: "Sprite (500ml)", barcode: "SPR1", section: "beverages", unit: "BOTTLE", agentPrice: 22.0, mrp: 40.0, shopRate: 35.0 },
+      bev_coke: { name: "Coca Cola (500ml)", barcode: "COC1", section: "beverages", unit: "BOTTLE", agentPrice: 22.0, mrp: 40.0, shopRate: 35.0 },
 
-      item_0_fcmgoldplu: { name: "FCM GOLD PLUS 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 75.4, mrp: 82.0, shopRate: 76.26 },
-      item_1_fullcreami: { name: "FULLCREAMILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 73.6, mrp: 80.0, shopRate: 74.4 },
-      item_2_stm500mlsa: { name: "STM 500 ML(SANGAM PREMIUM)", barcode: "", section: "milk", unit: "PKT", agentPrice: 61.75, mrp: 68.0, shopRate: 63.24 },
-      item_3_teaspecial: { name: "TEA SPECIAL 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 71.6, mrp: 78.0, shopRate: 72.54 },
-      item_4_tonnedmilk: { name: "TONNED MILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 57.85, mrp: 64.0, shopRate: 59.52 },
-      item_7_curd120gms: { name: "CURD 120 GMS SATCHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 7.6, mrp: 10.0, shopRate: 9.3 },
-      item_9_curd450gmss: { name: "CURD 450GMS SACHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 61.0, mrp: 84.0, shopRate: 78.12 },
-      item_17_stmcurd5k: { name: "S.T.M.CURD 5 KG (DISPO BUCKET)", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 360.0, mrp: 400.0, shopRate: 372.0 },
-      item_20_buttermilk: { name: "BUTTERMILK", barcode: "", section: "beverages", unit: "PKT", agentPrice: 7.6, mrp: 9.0, shopRate: 8.37 },
-      item_23_lassiwhite: { name: "LASSI (WHITE)", barcode: "", section: "beverages", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.25 },
-      item_29_panneer200: { name: "PANNEER 200 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 70.0, mrp: 85.0, shopRate: 79.05 },
-      item_96_buffeloghee5: { name: "BUFFELOGHEE 500ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.0, mrp: 345.0, shopRate: 320.85 }
+      sangam_0_fcmgoldplu: { name: "FCM GOLD PLUS 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 75.4, mrp: 82.0, shopRate: 75.44 },
+      sangam_1_fullcreami: { name: "FULLCREAMILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 73.6, mrp: 80.0, shopRate: 73.6 },
+      sangam_2_stm500mlsa: { name: "STM 500 ML(SANGAM PREMIUM)", barcode: "", section: "milk", unit: "PKT", agentPrice: 61.75, mrp: 68.0, shopRate: 62.56 },
+      sangam_3_teaspecial: { name: "TEA SPECIAL 500 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 71.6, mrp: 78.0, shopRate: 71.76 },
+      sangam_4_tonnedmilk: { name: "TONNED MILK 500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 57.85, mrp: 64.0, shopRate: 58.88 },
+      sangam_5_tonnedmilk: { name: "TONNEDMILK 170ML (5 pack)", barcode: "", section: "milk", unit: "PKT", agentPrice: 41.75, mrp: 50.0, shopRate: 46.0 },
+      sangam_6_dtm500ml: { name: "DTM500ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 51.35, mrp: 56.0, shopRate: 51.52 },
+      sangam_7_curd120gms: { name: "CURD 120 GMS SATCHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 7.6, mrp: 10.0, shopRate: 9.2 },
+      sangam_8_curd200gpa: { name: "CURD 200 G PACK", barcode: "", section: "curd", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_9_curd450gmss: { name: "CURD 450GMS SACHET", barcode: "", section: "curd", unit: "PKT", agentPrice: 61.0, mrp: 84.0, shopRate: 77.28 },
+      sangam_10_curdsachee: { name: "CURD SACHEET 900 GMS", barcode: "", section: "curd", unit: "PKT", agentPrice: 55.5, mrp: 70.0, shopRate: 64.4 },
+      sangam_11_stmcurdcu: { name: "S.T.M. CURD CUP100G", barcode: "", section: "curd", unit: "CUP", agentPrice: 8.0, mrp: 10.0, shopRate: 9.2 },
+      sangam_12_curd200gcu: { name: "CURD 200 G CUP", barcode: "", section: "curd", unit: "CUP", agentPrice: 17.5, mrp: 20.0, shopRate: 18.4 },
+      sangam_13_stmcurd50: { name: "S.T.M CURD 500G CUPS", barcode: "", section: "curd", unit: "CUP", agentPrice: 46.0, mrp: 55.0, shopRate: 50.6 },
+      sangam_14_stmcurd40: { name: "S.T.M CURD 400G CUPS", barcode: "", section: "curd", unit: "CUP", agentPrice: 34.0, mrp: 38.0, shopRate: 34.96 },
+      sangam_15_stmcurd1k: { name: "STM CURD 1 KG DISPO", barcode: "", section: "curd", unit: "KG", agentPrice: 88.0, mrp: 115.0, shopRate: 105.8 },
+      sangam_16_stmcurd10l: { name: "S.T.M.CURD 10 LIT (DISPO BUCKET)", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 710.0, mrp: 780.0, shopRate: 717.6 },
+      sangam_17_stmcurd5k: { name: "S.T.M.CURD 5 KG (DISPO BUCKET)", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 360.0, mrp: 400.0, shopRate: 368.0 },
+      sangam_18_tmcurd10kg: { name: "TM CURD 10 KG DISPO", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 660.0, mrp: 750.0, shopRate: 690.0 },
+      sangam_19_tmcurddisp: { name: "TM CURD DISPO 5 KG", barcode: "", section: "curd", unit: "BUCKET", agentPrice: 340.0, mrp: 390.0, shopRate: 358.8 },
+      sangam_20_buttermilk: { name: "BUTTERMILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 7.6, mrp: 9.0, shopRate: 8.28 },
+      sangam_21_jeerabutte: { name: "JEERA BUTTER MILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 10.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_22_lassisache: { name: "LASSI SACHET 180 GMS", barcode: "", section: "drinks", unit: "PKT", agentPrice: 10.4, mrp: 12.0, shopRate: 11.04 },
+      sangam_23_lassiwhite: { name: "LASSI (WHITE)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.0 },
+      sangam_24_sweetlassi: { name: "SWEETLASSI(MANGO)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.0 },
+      sangam_25_sweetlassi: { name: "SWEETLASSI(PINEAPPLE)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.0 },
+      sangam_26_sabjalassi: { name: "SABJA LASSI", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.75, mrp: 22.0, shopRate: 20.24 },
+      sangam_27_sweetlassi: { name: "SWEETLASSI(STRAWBERRY)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 18.25, mrp: 25.0, shopRate: 23.0 },
+      sangam_28_panner100g: { name: "PANNER 100 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 42.5, mrp: 49.0, shopRate: 45.08 },
+      sangam_29_panneer200: { name: "PANNEER 200 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 70.0, mrp: 85.0, shopRate: 78.2 },
+      sangam_30_panneer500: { name: "PANNEER 500 GRMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 168.0, mrp: 190.0, shopRate: 174.8 },
+      sangam_31_panneer1kg: { name: "PANNEER 1 KG", barcode: "", section: "paneer", unit: "KG", agentPrice: 337.0, mrp: 380.0, shopRate: 349.6 },
+      sangam_32_junnu100gm: { name: "JUNNU 100GMS CUP", barcode: "", section: "sweets", unit: "CUP", agentPrice: 17.25, mrp: 22.0, shopRate: 20.24 },
+      sangam_33_junnu50gms: { name: "JUNNU 50GMS CUP", barcode: "", section: "sweets", unit: "CUP", agentPrice: 9.0, mrp: 12.0, shopRate: 11.04 },
+      sangam_34_cream1000m: { name: "CREAM 1000 ML PACK", barcode: "", section: "sweets", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_35_dtcmtetric: { name: "DTCM TETRA 180 ML (APS)", barcode: "", section: "milk", unit: "PKT", agentPrice: 11.65, mrp: 13.0, shopRate: 11.96 },
+      sangam_36_dtmtetra18: { name: "DTM (TETRA) 180 ML", barcode: "", section: "milk", unit: "PKT", agentPrice: 11.65, mrp: 13.0, shopRate: 11.96 },
+      sangam_37_tetratm31l: { name: "TETRA T.M.(3%) 1 LIT PACK(12)", barcode: "", section: "milk", unit: "PKT", agentPrice: 58.5, mrp: 64.0, shopRate: 58.88 },
+      sangam_38_elifebuffe: { name: "E LIFE BUFFELOW (TM 500ML)(CARTON)", barcode: "", section: "milk", unit: "PKT", agentPrice: 26.4, mrp: 29.0, shopRate: 26.68 },
+      sangam_39_sugarlessk: { name: "SUGARLESSKOVA", barcode: "", section: "sweets", unit: "KG", agentPrice: 380.0, mrp: 400.0, shopRate: 368.0 },
+      sangam_40_basundifam: { name: "BASUNDI FAMILY PACK 300GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 64.0, mrp: 75.0, shopRate: 69.0 },
+      sangam_41_basundhi50: { name: "BASUNDHI 50 GMS(HOMEPACK)12", barcode: "", section: "sweets", unit: "PKT", agentPrice: 132.0, mrp: 180.0, shopRate: 165.6 },
+      sangam_42_doodhpeda2: { name: "DOODH PEDA 20GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 7.9, mrp: 9.0, shopRate: 8.28 },
+      sangam_43_doodhpedama: { name: "DOODH PEDA(MAP) 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 81.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_44_badambarfi: { name: "BADAM BARFI 200GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 114.0, mrp: 130.0, shopRate: 119.6 },
+      sangam_45_badammilkp: { name: "BADAM MILK POWDER 200GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 63.0, mrp: 80.0, shopRate: 73.6 },
+      sangam_46_gulabjam100: { name: "GULABJAM 100 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 18.5, mrp: 22.0, shopRate: 20.24 },
+      sangam_47_gulabjam400: { name: "GULABJAM 400 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 71.0, mrp: 80.0, shopRate: 73.6 },
+      sangam_48_gulabjamun: { name: "GULAB JAMUN 500 G", barcode: "", section: "sweets", unit: "PKT", agentPrice: 90.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_49_jowrladdu20: { name: "JOWR LADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_50_kajubarfi2: { name: "KAJU BARFI 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 135.0, mrp: 150.0, shopRate: 138.0 },
+      sangam_51_kalakandmap: { name: "KALAKAND (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 81.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_52_sugarlessk: { name: "SUGARLESS KALAKAND (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 106.0, mrp: 120.0, shopRate: 110.4 },
+      sangam_53_mysorepak20: { name: "MYSORE PAK 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 106.0, mrp: 120.0, shopRate: 110.4 },
+      sangam_54_ragiladdu20: { name: "RAGILADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_55_sunnunda: { name: "SUNNUNDA", barcode: "", section: "sweets", unit: "PKT", agentPrice: 112.0, mrp: 120.0, shopRate: 110.4 },
+      sangam_56_korraladu20: { name: "KORRALADU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_57_malailaddum: { name: "MALAI LADDU (MAP)150GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 79.0, mrp: 95.0, shopRate: 87.4 },
+      sangam_58_mixedmille: { name: "MIXED MILLET LADDU 200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 88.0, mrp: 100.0, shopRate: 92.0 },
+      sangam_59_kajusticks1: { name: "KAJU STICKS 120 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 68.0, mrp: 75.0, shopRate: 69.0 },
+      sangam_60_kajusticks2: { name: "KAJU STICKS 200 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 100.0, mrp: 110.0, shopRate: 101.2 },
+      sangam_61_kajubitees2: { name: "KAJU BITEES 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_62_orangekaju: { name: "ORANGE KAJU BITES 200", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_63_chocolateka: { name: "CHOCOLATE KAJU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 182.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_64_badamraki20: { name: "BADAM RAKI 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_65_attaladdu20: { name: "ATTA LADDU 200 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_66_chanaladdu2: { name: "CHANA LADDU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 180.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_67_milkcakemap: { name: "MILK CAKE (MAP)200 GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 90.0, mrp: 110.0, shopRate: 101.2 },
+      sangam_68_chocolatecu: { name: "CHOCOLATE CUP CAKE 20GMS", barcode: "", section: "snacks", unit: "CUP", agentPrice: 4.1, mrp: 5.0, shopRate: 4.6 },
+      sangam_69_venilacupca: { name: "VENILA CUP CAKE 20GMS", barcode: "", section: "snacks", unit: "CUP", agentPrice: 4.1, mrp: 5.0, shopRate: 4.6 },
+      sangam_70_venilabarca: { name: "VENILA BAR CAKE", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.9, mrp: 10.0, shopRate: 9.2 },
+      sangam_71_orangebarca: { name: "ORANGE BAR CAKE", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.9, mrp: 10.0, shopRate: 9.2 },
+      sangam_72_pineappleba: { name: "PINE APPLE BAR CK 32G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.6, mrp: 10.0, shopRate: 9.2 },
+      sangam_73_sfnutbadam2: { name: "SF NUT BADAM 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 25.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_74_sfmchocolat: { name: "SFM CHOCOLATE MILK", barcode: "", section: "drinks", unit: "PKT", agentPrice: 25.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_75_sfmilkdisp: { name: "S F MILK ( DISPO)", barcode: "", section: "drinks", unit: "CUP", agentPrice: 22.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_76_sfmilkpp: { name: "S F MILK ( PP)", barcode: "", section: "drinks", unit: "PKT", agentPrice: 20.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_77_sfkesarpis: { name: "SF KESAR PISTA 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_78_sfpinapple2: { name: "SF PINAPPLE 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_79_sfpistachio: { name: "SF PISTA CHIO 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_80_sfstrawberry: { name: "SF STRAWBERRY 200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 22.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_81_milkshapedo: { name: "MILKSHAKE DOUBLE CHOCOLATE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_82_butterscotc: { name: "BUTTER SCOTCH MILK SHAKE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_83_vanillamilk: { name: "VANILLA MILK SHAKE", barcode: "", section: "drinks", unit: "PKT", agentPrice: 23.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_84_ptbutter50: { name: "P.T BUTTER 500GMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 264.0, mrp: 280.0, shopRate: 257.6 },
+      sangam_85_ptbutter10: { name: "P.T BUTTER 100 GMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 55.0, mrp: 65.0, shopRate: 59.8 },
+      sangam_86_cbutter500g: { name: "C BUTTER 500GMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 266.0, mrp: 285.0, shopRate: 262.2 },
+      sangam_87_cbuter5kgca: { name: "C.BUTER 5 KG CARTONS", barcode: "", section: "paneer", unit: "KG", agentPrice: 266.0, mrp: 285.0, shopRate: 262.2 },
+      sangam_88_cookingbutte: { name: "COOKING BUTTER 100 GMS", barcode: "", section: "paneer", unit: "PKT", agentPrice: 61.0, mrp: 70.0, shopRate: 64.4 },
+      sangam_89_cowbutter20: { name: "COW/BUTTER 20KG", barcode: "", section: "paneer", unit: "KG", agentPrice: 10700.0, mrp: 11000.0, shopRate: 10120.0 },
+      sangam_90_whitebutter2: { name: "WHITEBUTTER 20KG", barcode: "", section: "paneer", unit: "KG", agentPrice: 10700.0, mrp: 11000.0, shopRate: 10120.0 },
+      sangam_91_peanutschik: { name: "PEANUTCHIKKI18 GMS BOTTLE", barcode: "", section: "snacks", unit: "BOTTLE", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_92_sesamchikki: { name: "SESAM CHIKKI18GMS BOTTLE", barcode: "", section: "snacks", unit: "BOTTLE", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_93_peanutschik: { name: "PEANUTCHIKKI90 GMS PKT", barcode: "", section: "snacks", unit: "PKT", agentPrice: 190.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_94_sesamchkii9: { name: "SESAM CHKII90GMS PKT", barcode: "", section: "snacks", unit: "PKT", agentPrice: 190.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_95_buffeloghee2: { name: "BUFFELOGHEE200ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 125.0, mrp: 145.0, shopRate: 133.4 },
+      sangam_96_buffeloghee5: { name: "BUFFELOGHEE 500ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.0, mrp: 345.0, shopRate: 317.4 },
+      sangam_97_buffeloghee1: { name: "BUFFELOGHEE 1000ML (4 PACK)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 610.0, mrp: 690.0, shopRate: 634.8 },
+      sangam_98_buffeloghee3: { name: "BUFFELOGHEE 15ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 8.3, mrp: 10.0, shopRate: 9.2 },
+      sangam_99_buffeloghee4: { name: "BUFFELOGHEE 30ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 16.6, mrp: 20.0, shopRate: 18.4 },
+      sangam_100_buffeloghee: { name: "BUFFELOGHEE 50ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 33.0, mrp: 40.0, shopRate: 36.8 },
+      sangam_101_bghee100mlj: { name: "B.GHEE 100ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 67.0, mrp: 78.0, shopRate: 71.76 },
+      sangam_102_bghee200mlj: { name: "B.GHEE 200ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 123.0, mrp: 145.0, shopRate: 133.4 },
+      sangam_103_bghee500mlj: { name: "B. GHEE 500ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 308.0, mrp: 350.0, shopRate: 322.0 },
+      sangam_104_bghee1000m: { name: "B.GHEE 1000ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 610.0, mrp: 700.0, shopRate: 644.0 },
+      sangam_105_bghee5ljar: { name: "B. GHEE 5L JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3050.0, mrp: 3350.0, shopRate: 3082.0 },
+      sangam_106_bghee200mld: { name: "BGHEE 200ML DINING", barcode: "", section: "ghee", unit: "JAR", agentPrice: 133.0, mrp: 155.0, shopRate: 142.6 },
+      sangam_107_bghee500mld: { name: "BGHEE 500ML DINING", barcode: "", section: "ghee", unit: "JAR", agentPrice: 317.0, mrp: 355.0, shopRate: 326.6 },
+      sangam_108_buffeloghee1: { name: "BUFFELOGHEE15KG TIN", barcode: "", section: "ghee", unit: "TIN", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9844.0 },
+      sangam_109_cowghee100m: { name: "COW GHEE 100ML JARS", barcode: "", section: "ghee", unit: "JAR", agentPrice: 66.0, mrp: 78.0, shopRate: 71.76 },
+      sangam_110_cowghee200m: { name: "COW GHEE 200ML JARS(60)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 123.0, mrp: 145.0, shopRate: 133.4 },
+      sangam_111_cowghee500m: { name: "COW GHEE 500ML JARS(08JARS)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 310.0, mrp: 350.0, shopRate: 322.0 },
+      sangam_112_cowghee1000: { name: "COW GHEE 1000 ML JARS(4)", barcode: "", section: "ghee", unit: "JAR", agentPrice: 611.0, mrp: 700.0, shopRate: 644.0 },
+      sangam_113_cowghee500m: { name: "COWGHEE 500ML (8 PACK)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 303.0, mrp: 345.0, shopRate: 317.4 },
+      sangam_114_cowghee5kja: { name: "COWGHEE 5KG JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3050.0, mrp: 3350.0, shopRate: 3082.0 },
+      sangam_115_cowghee15kg: { name: "COWGHEE15KG TIN", barcode: "", section: "ghee", unit: "TIN", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9844.0 },
+      sangam_116_cowghee1000: { name: "COWGHEE1000ML (POUCH)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 602.0, mrp: 690.0, shopRate: 634.8 },
+      sangam_117_cowghee200m: { name: "COWGHEE200ML (PACK)", barcode: "", section: "ghee", unit: "PKT", agentPrice: 121.0, mrp: 140.0, shopRate: 128.8 },
+      sangam_118_higharomagh: { name: "HIGH AROMA GHEE 100ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 73.0, mrp: 88.0, shopRate: 80.96 },
+      sangam_119_higharomagh: { name: "HIGH AROMA GHEE 200ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 140.0, mrp: 165.0, shopRate: 151.8 },
+      sangam_120_higharomagh: { name: "HIGH AROMA GHEE 500ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 320.0, mrp: 355.0, shopRate: 326.6 },
+      sangam_121_higharomagh: { name: "HIGH AROMA GHEE 1000ML JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 630.0, mrp: 710.0, shopRate: 653.2 },
+      sangam_122_higharomagh: { name: "HIGH AROMA GHEE 5L JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 3200.0, mrp: 3500.0, shopRate: 3220.0 },
+      sangam_123_higharomagh: { name: "HIGH AROMA GHEE 15 KG JAR", barcode: "", section: "ghee", unit: "JAR", agentPrice: 10200.0, mrp: 10700.0, shopRate: 9844.0 },
+      sangam_124_cowghee15ml: { name: "COW GHEE 15ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 8.3, mrp: 10.0, shopRate: 9.2 },
+      sangam_125_cowghee30ml: { name: "COW GHEE 30ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 16.6, mrp: 20.0, shopRate: 18.4 },
+      sangam_126_cowghee50ml: { name: "COW GHEE 50ML", barcode: "", section: "ghee", unit: "PKT", agentPrice: 34.0, mrp: 38.0, shopRate: 34.96 },
+      sangam_127_chakodi100g: { name: "CHAKODI 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_128_chakodi200g: { name: "CHAKODI 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.2 },
+      sangam_129_chakodi500g: { name: "CHAKODI 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 138.0 },
+      sangam_130_murukulong1: { name: "MURUKU LONG100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_131_murukulong2: { name: "MURUKU LONG200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.2 },
+      sangam_132_murukulong5: { name: "MURUKU LONG500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 138.0 },
+      sangam_133_karaboondhi: { name: "KARA BOONDHI 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_134_karaboondhi: { name: "KARA BOONDHI 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.2 },
+      sangam_135_karaboondhi: { name: "KARA BOONDHI 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 138.0 },
+      sangam_136_cornflaxesm: { name: "CORN FLAXES MIXTURE 100GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 24.0, mrp: 30.0, shopRate: 27.6 },
+      sangam_137_cornflaxesm: { name: "CORN FLAXES MIXTURE 200GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 48.0, mrp: 60.0, shopRate: 55.2 },
+      sangam_138_cornflaxesm: { name: "CORN FLAXES MIXTURE 500GMS", barcode: "", section: "snacks", unit: "PKT", agentPrice: 120.0, mrp: 150.0, shopRate: 138.0 },
+      sangam_139_jeerasoda20: { name: "JEERA SODA 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_140_lemonginger: { name: "LEMON GINGER 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_141_ornngecrush: { name: "ORNNGE CRUSH 200 ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_142_mangomagic2: { name: "MANGO MAGIC-200ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 13.0, mrp: 15.0, shopRate: 13.8 },
+      sangam_143_mangomagic3: { name: "MANGO MAGIC-300ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 16.75, mrp: 20.0, shopRate: 18.4 },
+      sangam_144_mangomagic6: { name: "MANGO MAGIC-600ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 29.75, mrp: 35.0, shopRate: 32.2 },
+      sangam_145_mangomagic1: { name: "MANGO MAGIC-1000ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 50.0, mrp: 60.0, shopRate: 55.2 },
+      sangam_146_mangomagic2: { name: "MANGO MAGIC-2000ML", barcode: "", section: "drinks", unit: "PKT", agentPrice: 90.0, mrp: 110.0, shopRate: 101.2 },
+      sangam_147_ulavacharu1: { name: "ULAVACHARU-100GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 30.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_148_ulavacharu2: { name: "ULAVACHARU-250GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 70.0, mrp: 80.0, shopRate: 73.6 },
+      sangam_149_ulavacharu5: { name: "ULAVACHARU-500GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 135.0, mrp: 155.0, shopRate: 142.6 },
+      sangam_150_ulavacharu1: { name: "ULAVACHARU-1000GMS", barcode: "", section: "sweets", unit: "PKT", agentPrice: 245.0, mrp: 290.0, shopRate: 266.8 },
+      sangam_151_rusk55gmspa: { name: "RUSK 55GMS PACK(40)", barcode: "", section: "snacks", unit: "PKT", agentPrice: 8.5, mrp: 10.0, shopRate: 9.2 },
+      sangam_152_rusk200gmsp: { name: "RUSK 200GMS PACK(20)", barcode: "", section: "snacks", unit: "PKT", agentPrice: 26.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_153_chillipowde: { name: "CHILLI POWDER(50GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 13.0, mrp: 20.0, shopRate: 18.4 },
+      sangam_154_chillipowde: { name: "CHILLI POWDER(100GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 26.0, mrp: 40.0, shopRate: 36.8 },
+      sangam_155_chillipowde: { name: "CHILLI POWDER(200GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 49.0, mrp: 75.0, shopRate: 69.0 },
+      sangam_156_turmericpow: { name: "TURMERIC POWDER(50G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 11.0, mrp: 20.0, shopRate: 18.4 },
+      sangam_157_turmericpow: { name: "TURMERIC POWDER(100GR)", barcode: "", section: "spices", unit: "PKT", agentPrice: 22.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_158_sabarmasala: { name: "SABAR MASALA (8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.75, mrp: 5.0, shopRate: 4.6 },
+      sangam_159_sabarmasala: { name: "SABAR MASALA (50 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 16.0, mrp: 20.0, shopRate: 18.4 },
+      sangam_160_garammasala: { name: "GARAM MASALA (8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.9, mrp: 5.0, shopRate: 4.6 },
+      sangam_161_garammasala: { name: "GARAM MASALA (50 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 20.0, mrp: 35.0, shopRate: 32.2 },
+      sangam_162_chikenmasal: { name: "CHIKEN MASALA ( 8 G)", barcode: "", section: "spices", unit: "PKT", agentPrice: 2.75, mrp: 5.0, shopRate: 4.6 },
+      sangam_163_attacookies: { name: "ATTA COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_164_attacookies: { name: "ATTA COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_165_attacookies: { name: "ATTA COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_166_multigrainc: { name: "MULTI GRAIN COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_167_multigrainc: { name: "MULTI GRAIN COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_168_multigrainc: { name: "MULTI GRAIN COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_169_sweetsamp: { name: "SWEETS & SALT COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_170_sweetsamp: { name: "SWEETS & SALT COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_171_sweetsamp: { name: "SWEETS & SALT COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_172_ajwaincooki: { name: "AJWAIN COOKIES 20 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_173_ajwaincooki: { name: "AJWAIN COOKIES 50 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_174_ajwaincooki: { name: "AJWAIN COOKIES 100 G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_175_butterscotc: { name: "BUTTER SCOTCH COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_176_butterscotc: { name: "BUTTER SCOTCH COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_177_butterscotc: { name: "BUTTER SCOTCH COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_178_coconutcooki: { name: "COCONUT COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_179_coconutcooki: { name: "COCONUT COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_180_coconutcooki: { name: "COCONUT COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_181_coffeecookie: { name: "COFFEE COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_182_coffeecookie: { name: "COFFEE COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_183_coffeecookie: { name: "COFFEE COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_184_chocolateco: { name: "CHOCOLATE COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_185_chocolateco: { name: "CHOCOLATE COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_186_chocolateco: { name: "CHOCOLATE COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_187_buttercookie: { name: "BUTTER COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_188_buttercookie: { name: "BUTTER COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_189_buttercookie: { name: "BUTTER COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_190_honeyoatscoo: { name: "HONEY OATS COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_191_honeyoatscoo: { name: "HONEY OATS COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_192_honeyoatscoo: { name: "HONEY OATS COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_193_spicymasala: { name: "SPICY MASALA COOKIES 20G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 200.0, mrp: 250.0, shopRate: 230.0 },
+      sangam_194_spicymasala: { name: "SPICY MASALA COOKIES 50G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 170.0, mrp: 200.0, shopRate: 184.0 },
+      sangam_195_spicymasala: { name: "SPICY MASALA COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 228.0, mrp: 276.0, shopRate: 253.92 },
+      sangam_196_ialmondcooki: { name: "RAGI ALMOND COOKIES100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 35.0, mrp: 40.0, shopRate: 36.8 },
+      sangam_197_jowarcashe: { name: "JOWAR CASHEW COOKIES 100G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 35.0, mrp: 40.0, shopRate: 36.8 },
+      sangam_198_sugarlessr: { name: "SUGAR LESS RAGI LADDU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 112.0, mrp: 130.0, shopRate: 119.6 },
+      sangam_199_sugarlesss: { name: "SUGAR LESS SUNNUNDALU 200G", barcode: "", section: "snacks", unit: "PKT", agentPrice: 112.0, mrp: 130.0, shopRate: 119.6 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v17";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v17";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v17";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v17";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v17";
-    const CLOUD_KEY_HOME = "annapurna_cloud_home_v17";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v19";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v19";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v19";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v19";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v19";
+    const CLOUD_KEY_HOME = "annapurna_cloud_home_v19";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -1379,8 +1568,8 @@
     };
 
     window.clearCatalogPrompt = async function() {
-      if (confirm("Are you sure you want to WIPE all products and start with a completely empty catalog?")) {
-        masterItems = {};
+      if (confirm("Are you sure you want to reset your catalog back to the default Cafe & Dairy items?")) {
+        masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
         posCart = {};
         await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
         renderMasterTable();
@@ -1388,7 +1577,7 @@
         renderKiranaFormFields();
         populateHomeProductDropdown();
         loadDateData();
-        showScanToast("Catalog Cleared", "All products removed. Ready for fresh scan!", false);
+        showScanToast("Catalog Reset", "Restored default Cafe & Dairy catalog!", true);
       }
     };
 
@@ -1410,7 +1599,7 @@
         return;
       }
 
-      const priorityOrder = ['cafe', 'bev', 'tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'ghee', 'paneer'];
+      const priorityOrder = ['cafe', 'bev', 'sangam'];
       
       const sortedKeys = keys.sort((a, b) => {
         let idxA = priorityOrder.findIndex(p => a.toLowerCase().includes(p));
@@ -2477,7 +2666,6 @@
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
         if (docSnap.exists()) {
           const cloudData = JSON.parse(docSnap.data().value);
-          // Auto-merge defaults so new items are never lost
           masterItems = { ...DEFAULT_MASTER_ITEMS, ...cloudData };
           renderPosGrid();
           renderMasterTable();
@@ -2531,7 +2719,6 @@
       const mRes = await cloudGet(CLOUD_KEY_MASTER);
       if (mRes && mRes.value) {
         const saved = JSON.parse(mRes.value);
-        // Force merge DEFAULT_MASTER_ITEMS so new items are guaranteed to appear
         masterItems = { ...DEFAULT_MASTER_ITEMS, ...saved };
       } else {
         masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
