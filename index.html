@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="md:col-span-2">
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Product Name *</label>
-            <input type="text" id="formProductName" required placeholder="e.g. TM, FCM, Small Milk, Big Curd, Ghee 500ml" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductName" required placeholder="e.g. TM 500ml, FCM 500ml, Ghee 500ml" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -134,14 +134,13 @@
               <option value="ghee">Ghee (500ml, 1L, Jars)</option>
               <option value="paneer">Paneer &amp; Butter</option>
               <option value="drinks">Lassi &amp; Buttermilk / Drinks</option>
-              <option value="nobarcode">⚡ Fresh / Loose / Quick Pick</option>
-              <option value="general">Other Items</option>
+              <option value="general">Sweets &amp; Other Items</option>
             </select>
           </div>
 
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1 uppercase tracking-wider">Unit</label>
-            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, CUP, BUCKET" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formProductUnit" value="PKT" placeholder="PKT, LTR, KG, BUCKET, JAR" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white uppercase mono focus:outline-none focus:border-emerald-500">
           </div>
 
           <div>
@@ -273,7 +272,7 @@
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>Cow Milk - 4</code>, <code>Big Curd - 2</code>, <code>Ghee 500ml - 3</code>).
+          Line 1: <b>Shop Name</b>, Line 2+: items &amp; quantities (e.g. <code>TM - 5</code>, <code>Cow Milk - 4</code>, <code>Big Curd - 2</code>, <code>Ghee 500ml - 1</code>).
         </p>
         <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5&#10;Cow Milk - 3&#10;Big Curd - 2&#10;Ghee 500ml - 1&#10;Buttermilk - 10&#10;Lassi - 5&#10;Paneer - 2"></textarea>
       </div>
@@ -315,13 +314,11 @@
             </div>
           </div>
 
-          <!-- Dynamic Products Grid with Stepper Controls -->
           <div class="space-y-3 pt-2">
             <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Delivery Quantities (Milk, Curd, Ghee, Buttermilk, Lassi, Paneer)</span>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="kiranaDynamicItemsContainer"></div>
           </div>
 
-          <!-- Live Total & Submit -->
           <div class="flex flex-col md:flex-row justify-between items-center p-3.5 bg-slate-800 rounded-xl border border-slate-700 gap-3">
             <div class="text-xs text-slate-300 flex items-center gap-4">
               <span>Shop Bill: <strong class="text-white text-base mono" id="liveKiranaBill">₹0.00</strong></span>
@@ -335,7 +332,6 @@
         </form>
       </div>
 
-      <!-- Kirana Register Table -->
       <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
@@ -813,13 +809,28 @@
       }
     }
 
-    const DEFAULT_MASTER_ITEMS = {};
+    // Pre-loaded Sangam Rate Chart items matching your exact requested categories
+    const DEFAULT_MASTER_ITEMS = {
+      tm: { name: "TM (Toned Milk 500ml)", barcode: "", section: "milk", unit: "PKT", agentPrice: 57.85, mrp: 64.00, shopRate: 60.00 },
+      fcm: { name: "FCM Gold Plus 500ml", barcode: "", section: "milk", unit: "PKT", agentPrice: 75.40, mrp: 82.00, shopRate: 76.00 },
+      cowmilk: { name: "Cow Milk 500ml", barcode: "", section: "milk", unit: "PKT", agentPrice: 62.00, mrp: 70.00, shopRate: 64.00 },
+      smilk: { name: "Small Milk (170ml)", barcode: "", section: "milk", unit: "PKT", agentPrice: 41.75, mrp: 50.00, shopRate: 45.00 },
+      scurd: { name: "Small Curd (120g Satchet)", barcode: "", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
+      curd450: { name: "Big Curd (450g Sachet)", barcode: "", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 66.00 },
+      bucket5kg: { name: "5kg Curd Dispo Bucket", barcode: "", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 },
+      bucket10kg: { name: "10kg Curd Dispo Bucket", barcode: "", section: "bucket", unit: "BUCKET", agentPrice: 660.00, mrp: 750.00, shopRate: 700.00 },
+      ghee500: { name: "Buffalo Ghee 500ml", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.00, mrp: 345.00, shopRate: 320.00 },
+      ghee1000: { name: "Buffalo Ghee 1000ml", barcode: "", section: "ghee", unit: "JAR", agentPrice: 610.00, mrp: 690.00, shopRate: 640.00 },
+      buttermilk: { name: "Masala Buttermilk Sachet", barcode: "", section: "drinks", unit: "PKT", agentPrice: 7.60, mrp: 9.00, shopRate: 8.00 },
+      lassi: { name: "Sweet Lassi Cup", barcode: "", section: "drinks", unit: "CUP", agentPrice: 17.50, mrp: 20.00, shopRate: 18.50 },
+      paneer: { name: "Fresh Paneer 200g", barcode: "", section: "paneer", unit: "PKT", agentPrice: 70.00, mrp: 85.00, shopRate: 78.00 }
+    };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v12";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v12";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v12";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v12";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v12";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v13";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v13";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v13";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v13";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v13";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -1178,7 +1189,7 @@
       }
     }
 
-    // Add / Edit Product Modals (Camera button removed from form)
+    // Add / Edit Product Modals (Camera button removed from form as requested)
     window.openNewProductModal = function(initialBarcode = "") {
       setText("productModalTitle", "Add New Product to Shop");
       const form = document.getElementById("productEntryForm");
@@ -1330,7 +1341,7 @@
     };
 
     // =========================================================================
-    // 🏪 KIRANA ORDER & DELIVERY (SORTED BY USER SPECIFICATION)
+    // 🏪 KIRANA ORDER & DELIVERY (SORTED & GROUPED AS REQUESTED)
     // =========================================================================
     function renderKiranaFormFields() {
       const container = document.getElementById("kiranaDynamicItemsContainer");
@@ -1347,7 +1358,7 @@
         return;
       }
 
-      // Order configuration requested: Milk (tm, fcm, small milk), Curd (small curd, big curd, 5kg bucket, 10kg bucket), Ghee (500ml, 1l), buttermilk, lassi, paneer, and others.
+      // Sorted order: Milk (tm, fcm, cowmilk, smilk), Curd (scurd, curd450, bucket5kg, bucket10kg), Ghee (ghee500, ghee1000), others (buttermilk, lassi, paneer)
       const priorityOrder = ['tm', 'fcm', 'cowmilk', 'smilk', 'scurd', 'curd450', 'bucket5kg', 'bucket10kg', 'ghee', 'buttermilk', 'lassi', 'paneer'];
       
       const sortedKeys = keys.sort((a, b) => {
@@ -1789,6 +1800,7 @@
         if (it.section === "curd") badgeColor = "text-amber-400";
         if (it.section === "bucket") badgeColor = "text-indigo-400";
         if (it.section === "paneer") badgeColor = "text-emerald-400";
+        if (it.section === "ghee") badgeColor = "text-yellow-400";
         if (it.section === "drinks") badgeColor = "text-purple-400";
         if (it.section === "nobarcode") badgeColor = "text-rose-400";
 
