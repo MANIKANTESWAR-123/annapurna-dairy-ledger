@@ -883,12 +883,12 @@
       item_96_buffeloghee5: { name: "BUFFELOGHEE 500ML", barcode: "", section: "ghee", unit: "JAR", agentPrice: 305.0, mrp: 345.0, shopRate: 320.85 }
     };
 
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v16";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v16";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v16";
-    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v16";
-    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v16";
-    const CLOUD_KEY_HOME = "annapurna_cloud_home_v16";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v17";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v17";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v17";
+    const CLOUD_KEY_POS_LOGS = "annapurna_cloud_pos_v17";
+    const CLOUD_KEY_EXPENSES = "annapurna_cloud_expenses_v17";
+    const CLOUD_KEY_HOME = "annapurna_cloud_home_v17";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -2476,7 +2476,9 @@
     function attachLiveSyncListeners() {
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
         if (docSnap.exists()) {
-          masterItems = JSON.parse(docSnap.data().value);
+          const cloudData = JSON.parse(docSnap.data().value);
+          // Auto-merge defaults so new items are never lost
+          masterItems = { ...DEFAULT_MASTER_ITEMS, ...cloudData };
           renderPosGrid();
           renderMasterTable();
           renderKiranaFormFields();
@@ -2527,8 +2529,11 @@
 
     async function initialLoad() {
       const mRes = await cloudGet(CLOUD_KEY_MASTER);
-      if (mRes && mRes.value) masterItems = JSON.parse(mRes.value);
-      else {
+      if (mRes && mRes.value) {
+        const saved = JSON.parse(mRes.value);
+        // Force merge DEFAULT_MASTER_ITEMS so new items are guaranteed to appear
+        masterItems = { ...DEFAULT_MASTER_ITEMS, ...saved };
+      } else {
         masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
         await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
       }
